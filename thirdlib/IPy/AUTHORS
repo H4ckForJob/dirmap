@@ -1,0 +1,45 @@
+Authors
+=======
+
+Jeff Ferland <jeff AT storyinmemo.com>
+   > Current maintainer, versions 0.76 through latest
+Victor Stinner <victor.stinner AT gmail.com>
+   > Maintainer, versions 0.5 through 0.75
+Maximillian Dornseif <md AT hudora.de>
+   > IPy author and maintainer until the version 0.42
+
+Contributors
+============
+
+Aras Vaichas <arasv AT magtech.com.au>
+   > fix __getitem__ for IP object of size 1
+Arfrever Frehtes Taifersar Arahesis <Arfrever.FTA@gmail.com>
+   > IP('0.0.0.0/0') + IP('0.0.0.0/0') raises an error
+Bernhard Frauendienst <contact AT obeliks.de>
+   > fix IPv6 parser
+James Teh <james.teh AT netboxblue.com>
+   > make_net option patch
+Jean Gillaux <jgillaux AT inl.fr>
+   > fix netmask "/0.0.0.0"
+Mark Johnston
+   > bringing IPy to Python 2.3
+Matthew Flanagan <mattimustang AT gmail.com>
+   > fix strCompressed()
+Robert Nickel <rnickel AT scea.com>
+   > fix setup.py bdist_rpm
+Samuel Krempp
+   > fix __cmp__() bug
+Shell, Hin-lik Hung
+   > bring IPy to OpenBSD ports
+Skinny Puppy
+   > __add__() now always  returns a value
+Sander Steffann (sander AT steffann.nl)
+   > Fix the IPv6 address range descriptions
+   > Add IPSet functions
+William McVey <wam AT cisco.com>
+   > Fix IP.__nonzero__()
+David <d1b AT d1b.org>
+   > Preserve IP object in comparisons
+Dan McGee <dpmcgee AT gmail.com>
+   > Cleaner bit-twiddling code
+

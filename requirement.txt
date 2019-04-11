@@ -1,0 +1,4 @@
+gevent
+requests
+progressbar2
+lxml

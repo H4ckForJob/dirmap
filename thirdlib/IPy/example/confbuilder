@@ -1,0 +1,169 @@
+use Net::IP;
+
+@ns=(':ns.nerxs.com',':ns.dorsch.org',':ns.c0re.jp');
+
+print "\n# domains\n";
+
+open(IN, '<domains');
+
+while(<IN>)
+{
+  if(!/^#/)
+     {	
+      s/\n//;
+      ($domain, $owner) = split(/:/);
+      print ("'$domain:Contact for this domain is $owner\n");
+      foreach (@ns) 
+      {
+	print (".".$domain.":$_\n");
+      }
+     }
+   }
+
+
+print "\n# networks\n";
+      
+open(IN, '<networks');
+
+while(<IN>)
+  {
+
+    if(!/^#/)
+       {	
+	s/\n//;
+	print "# $_\n";
+	@nets = split(/,/);
+	$name = shift @nets;
+	foreach(@nets)
+	{
+	  my $ip = new Net::IP($_) or die (Net::IP::Error());
+	  $net=$ip->ip();
+	  $last=$ip->last_ip();
+	  $net =~ s/://g;
+	  $last =~ s/://g;
+	  
+	  if($ip->size() > 32)
+	    {
+	      foreach (@ns) 
+		{
+		  print (".".$ip->reverse_ip().":$_\n");
+		}
+	        $ip6map{$ip->ip()} = $name;
+	    }
+	  else
+	    {
+	      for($i = int($ip->intip()) + 1; $i < int($ip->intip()) + int($ip->size()); $i++)
+		{
+		  $nmap{sprintf("%d.%d.%d.%d", ($i >> 24) & 0xff, ($i >> 16) & 0xff, ($i>>8) & 0xff, $i & 0xff)} = "$name";
+		  $rmap{sprintf("%d.%d.%d.%d", ($i >> 24) & 0xff, ($i >> 16) & 0xff, ($i>>8) & 0xff, $i & 0xff)} = $ip->binip(). ".$name";
+		}
+	    }
+	  print ("=net.$name:".$net."\n");
+	  print ("=broadcast.$name:".$last."\n");
+	  #print ("Bin : ".$ip->binip()."\n");
+	  #print ("Mask: ".$ip->mask()."\n");
+	  #print ("Size: ".$ip->size()."\n");
+	  #print ("Type: ".$ip->iptype()."\n");
+	}
+       }
+     }
+      
+close(IN);
+
+print "\n# hosts\n";
+      
+open(IN, '<hosts');
+
+while(<IN>)
+  {
+    s/\n//;
+    if(!/^#/)
+       {	
+	if(!/^-/)
+	{
+	  if(/^=/ || /^\+/)
+	    {
+	      @i = split(':');
+	      $rmap{$i[1]} = '';
+	    }
+	  print "$_\n";
+	}
+	else
+	{
+	  @fields = split(/\|/);
+	  $name = shift(@fields);
+	  $name =~ s/^.(.)/$1/;
+	  $_ = shift(@fields);
+	  @ips = split(/,/);
+	  $_ = shift(@fields);
+	  @aliases = split(/,/);
+	  $admin = shift(@fields);
+	  if(!$admin)
+	    {
+	      $admin = 'technik@c0re.23.nu';
+ 	    }
+	  $_ = shift(@fields);
+	  @mxes = split(/,/);
+	  foreach(@ips)
+	    {
+	      my $ip = new Net::IP($_) or die (Net::IP::Error());
+	      if(length($ip->binip()) == 32)
+		 {
+		   # IPv4 is easy
+		   if(!$nmap{$_})
+		     {
+		       print STDERR "*** warning: no network for $_ ($name) - ignoring\n";
+		       print "# no network for $_ ($name) - ignoring\n";
+		     }
+		   else  
+		     {
+		       print "=$name." . $nmap{$_} . ":$_\n";
+		       $rmap{$_} = '';      
+		       print "'$name." . $nmap{$_} . ":Host contact is $admin\n";
+		     }	
+		   foreach(@aliases)
+		     {
+		       print "+$_:".$ip->ip()."\n";
+		       print "'$_:Host contact is $admin\n";
+		     }
+		 }
+	      else
+		{
+		  #IPv6 here
+		  $net = $ip->ip();
+		  $net  =~ s/^(....:....:....:....).*/$1:0000:0000:0000:0000/;
+		  if(!$ip6map{$net})
+		    {
+		      print STDERR "*** warning: no network for $_ ($name) - ignoring\n";
+		      print "# no network for $_ ($name) - ignoring\n";
+		    }
+		  else  
+		     {
+		       $rip = $ip->ip();
+		       $rip =~ s/://g;
+		       print "6$name." . $ip6map{$net} . ":".$rip."\n";
+		    }
+	      foreach(@aliases)
+		{
+		  $rip = $ip->ip();
+		  $rip =~ s/://g;
+		  print "3$_:".$rip."\n";      		    
+		}
+		}	
+
+	    }
+	}
+       }
+     }
+      
+close(IN);
+
+
+print "\n# reverse lookup\n";
+foreach(sort(keys(%nmap))) 
+{
+  if($rmap{$_})
+    {
+      print "=".$rmap{$_}.":$_\n";
+    }
+}

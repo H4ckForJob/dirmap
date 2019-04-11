@@ -1,0 +1,134 @@
+Version 0.83 (2015-04-04)
+------------
+ * Add carrier grade NAT ranges
+ * Unbreak lots of packing systems by not having a letter in the release version
+
+Version 0.82a (2014-10-07)
+------------
+ * Fix version numbers in files
+ * Correct x.next() -> next(x) python3 compatability
+
+Version 0.82 (2014-10-06)
+------------
+
+ * Add support for array slices
+ * Add __and__ and isdisjoint for IPSet
+ * Fix a bug in IPSet where contains may incorrectly return false
+ * Added some fuzz testing
+
+Version 0.81 (2013-04-08)
+------------
+
+ * Correct reverseName() for IPv6 addresses, so IP('::1').reverseName() returns correct.
+ * Add network mask awareness to v46map()
+ * Fix Python 3 errors in IPSet class
+ * Make IPSet base class be object when MutableSet isn't available, fixing
+   errors in Python 2.5
+
+Version 0.80 (2013-03-26)
+------------
+
+ * Drop support of Python older than 2.4
+ * Python 3 does not need 2to3 conversion anymore (same code base)
+ * Fix adding of non-adjacent networks:
+   192.168.0.0/24 + 192.168.255.0/24 made 192.168.0.0/23
+ * Fix adding networks that don't create a valid subnet:
+   192.168.1.0/24 + 192.168.2.0/24 made 192.168.1.0/23
+ * Fix adding with an IPv6 address where .int() was < 32 bits made IPy believe it
+  was an IPv4 address:
+  ::ffff:0/112 + ::1:0:0/112 made 255.255.0.0/111
+ * Add support of IPSets
+ * Add support for subtracting a network range
+ * Prevent IPv4 and IPv6 ranges from saying they contain each other
+ * Add a .v46map() method to convert mapped address ranges
+   such as IP('::ffff:192.168.1.1'); RFC 4291
+ * Change sort order to more natural: 
+   IPv4 before IPv6; less-specific prefixes first (/0 before /32)
+
+
+Version 0.76 (2013-03-19)
+-------------------------
+
+ * ip == other and ip != other doesn't fail with an exception anymore if other
+  is not a IP object
+ * Add IP.get_mac() method: get the 802.3 MAC address from IPv6 RFC 2464
+  address.
+ * Fix IP('::/0')[0]: return an IPv6 instead of an IPv4 address
+
+Version 0.75 (2011-04-12)
+-------------------------
+
+ * IP('::/0').netmask() gives IP('::') instead of IP('0.0.0.0')
+
+Version 0.74 (2011-02-16)
+-------------------------
+
+ * Fix tests for Python 3.1 and 3.2
+ * ip.__nonzero__() and (ipa in ipb) return a bool instead of 0 or 1
+ * IP('0.0.0.0/0') + IP('0.0.0.0/0') raises an error, fix written by Arfrever
+
+Version 0.73 (2011-02-15)
+-------------------------
+
+ * Support Python 3: setup.py runs 2to3
+ * Update the ranges for IPv6 IPs
+ * Fix reverseName() and reverseNames() for IPv4 in IPv6 addresses
+ * Drop support of Python < 2.5
+
+Version 0.72 (2010-11-23)
+-------------------------
+
+ * Include examples and MANIFEST.in in source build (add them to
+   MANIFEST.in)
+ * Remove __rcsid__ constant from IPy module
+
+Version 0.71 (2010-10-01)
+-------------------------
+
+ * Use xrange() instead of range()
+ * Use isinstance(x, int) instead of type(x) == types.IntType
+ * Prepare support of Python3 (use integer division: x // y)
+ * Fix IP(long) constructor: ensure that the address is not too large
+ * Constructor raise a TypeError if the type is not int, long,
+   str or unicode
+ * 223.0.0.0/8 is now public (belongs to APNIC)
+
+Version 0.70 (2009-10-29)
+-------------------------
+
+ * New "major" version because it may break compatibility
+ * Fix __cmp__(): IP('0.0.0.0/0') and IP('0.0.0.0') are not equal
+ * Fix IP.net() of the network "::/0": "::" instead of "0.0.0.0".
+   IPy 0.63 should fix this bug, but it wasn't.
+
+Version 0.64 (2009-08-19)
+-------------------------
+
+ * Create MANIFEST.in to fix setup.py bdist_rpm, fix by Robert Nickel
+
+Version 0.63 (2009-06-23)
+-------------------------
+
+ * Fix formatting of "IPv4 in IPv6" network, eg. IP('::ffff:192.168.10.0/120'),
+   the netmask ("/120" in the example) was missing!
+
+Version 0.62 (2008-07-15)
+-------------------------
+
+ * Fix reverse DNS of IPv6 address: use ".ip6.arpa." suffix instead of
+   deprecated ".ip6.int." suffix
+
+Version 0.61 (2008-06-12)
+-------------------------
+
+ * Patch from Aras Vaichas allowing the [-1] operator
+   to work with an IP object of size 1.
+
+Version 0.60 (2008-05-16)
+-------------------------
+
+ * strCompressed() formats '::ffff:a.b.c.d' correctly
+ * Use strCompressed() instead of strFullsize() to format IP addresses,
+   ouput is smarter with IPv6 address
+ * Remove check_addr_prefixlen because it generates invalid IP address
+

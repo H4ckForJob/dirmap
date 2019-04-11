@@ -1,0 +1,12 @@
+php
+asp
+aspx
+html
+txt
+doc
+jsp
+py
+zip
+rar
+7z
+bak
