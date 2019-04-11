@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-04-11 13:18:29
+@LastEditTime: 2019-04-11 20:48:44
 '''
 
 import configparser
@@ -76,8 +76,8 @@ def loadConf():
     conf.exclude_subdirs = eval(ConfigFileParser().exclude_subdirs())
         
     conf.dict_mode = eval(ConfigFileParser().dict_mode())
-    conf.dict_mode_load_single_dict = eval(ConfigFileParser().dict_mode_load_single_dict())
-    conf.dict_mode_load_mult_dict = eval(ConfigFileParser().dict_mode_load_mult_dict())
+    conf.dict_mode_load_single_dict = os.path.join(paths.DATA_PATH,eval(ConfigFileParser().dict_mode_load_single_dict()))
+    conf.dict_mode_load_mult_dict = os.path.join(paths.DATA_PATH,eval(ConfigFileParser().dict_mode_load_mult_dict()))
     conf.blast_mode = eval(ConfigFileParser().blast_mode())
     conf.blast_mode_min = eval(ConfigFileParser().blast_mode_min())
     conf.blast_mode_max = eval(ConfigFileParser().blast_mode_max())
@@ -90,8 +90,8 @@ def loadConf():
     conf.crawl_mode_parse_html = eval(ConfigFileParser().crawl_mode_parse_html())
     conf.crawl_mode_dynamic_fuzz = eval(ConfigFileParser().crawl_mode_dynamic_fuzz())
     conf.fuzz_mode = eval(ConfigFileParser().fuzz_mode())
-    conf.fuzz_mode_load_single_dict = eval(ConfigFileParser().fuzz_mode_load_single_dict())
-    conf.fuzz_mode_load_mult_dict = eval(ConfigFileParser().fuzz_mode_load_mult_dict())
+    conf.fuzz_mode_load_single_dict = os.path.join(paths.DATA_PATH,eval(ConfigFileParser().fuzz_mode_load_single_dict()))
+    conf.fuzz_mode_load_mult_dict = os.path.join(paths.DATA_PATH,eval(ConfigFileParser().fuzz_mode_load_mult_dict()))
     conf.fuzz_mode_label = eval(ConfigFileParser().fuzz_mode_label())
 
     conf.request_headers = eval(ConfigFileParser().request_headers())
@@ -292,9 +292,9 @@ def ScanModeHandler():
     '''
     if conf.dict_mode:
         if conf.dict_mode == 1:
-            return loadSingleDict(paths.DATA_PATH + conf.dict_mode_load_single_dict)
+            return loadSingleDict(conf.dict_mode_load_single_dict)
         elif conf.dict_mode == 2:
-            return loadMultDict(paths.DATA_PATH + conf.dict_mode_load_mult_dict)
+            return loadMultDict(conf.dict_mode_load_mult_dict)
         else:
             outputscreen.error("[-] You must select a dict")
             sys.exit()
@@ -317,14 +317,14 @@ def ScanModeHandler():
                         payloads.crawl_mode_dynamic_fuzz_temp_dict.add(url)
         payloads.crawl_mode_dynamic_fuzz_temp_dict = payloads.crawl_mode_dynamic_fuzz_temp_dict - {'#', ''}
         #加载后缀，TODO:独立动态生成字典模块
-        loadSuffix(paths.DATA_PATH + '\\crawl_mode_suffix.txt')
+        loadSuffix(os.path.join(paths.DATA_PATH,'crawl_mode_suffix.txt'))
         #生成新url
         for i in payloads.crawl_mode_dynamic_fuzz_temp_dict:
             payloads.crawl_mode_dynamic_fuzz_dict.extend(generateCrawlDict(i))
         return payloads.crawl_mode_dynamic_fuzz_dict
     elif conf.fuzz_mode:
         if conf.fuzz_mode == 1:
-            return generateFuzzDict(paths.DATA_PATH + conf.fuzz_mode_load_single_dict)
+            return generateFuzzDict(conf.fuzz_mode_load_single_dict)
     else:
         outputscreen.error("[-] You must select a scan mode")
         sys.exit()
