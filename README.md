@@ -2,6 +2,8 @@
 
 一个高级web目录扫描工具，功能将会强于DirBuster、Dirsearch、cansina、御剑
 
+![dirmap](doc/dirmap.png)
+
 # 需求分析
 
 经过大量调研，总结一个优秀的web目录扫描工具至少具备以下功能：
@@ -30,7 +32,7 @@ dirmap在编写过程中，借鉴了大量的优秀开源项目的模式与思�
 
 # 功能特点
 
-- [x] 命令解析全局初始化
+- [x] 命令行参数解析全局初始化
 - [x] engine初始化
   - [x] 设置线程数
 - [x] target初始化
@@ -39,7 +41,7 @@ dirmap在编写过程中，借鉴了大量的优秀开源项目的模式与思�
   - [x] ip范围
 - [ ] bruter初始化
   - [ ] 加载配置方式()
-    - [ ] 读取参数值(默认)
+    - [ ] 读取命令行参数值(默认)
     - [x] 读取配置文件(-lcf)
   - [ ] 递归模式选项(RecursiveScan)
     - [x] 递归扫描(-rs,recursive_scan)
@@ -58,7 +60,7 @@ dirmap在编写过程中，借鉴了大量的优秀开源项目的模式与思�
         - [ ] 基于0-9
       - [x] 基于自定义字符集(-bmcc,blast_mode_custom_charset)
       - [x] 断点续生成payload(-bmrc,blast_mode_resume_charset)
-    - [ ] 爬虫模式(-cm,Crawl Model)
+    - [ ] 爬虫模式(-cm,crawl_mode)
       - [x] 自定义解析标签(-cmph,crawl_mode_parse_html)(a:href,img:src,form:action,script:src,iframe:src,div:src,frame:src,embed:src)
       - [ ] 解析robots.txt(-cmpr,crawl_mode_parse_robots)
       - [x] 爬虫类动态fuzz扫描(-cmdf,crawl_mode_dynamic_fuzz)
@@ -131,9 +133,6 @@ python3 -m pip install -r requirement.txt
 
 ## 快速使用
 
-
-## 运行dirmap
-
 ### 单个目标
 
 ```shell
@@ -146,11 +145,17 @@ python3 dirmap.py -iU https://target.com -lcf
 python3 dirmap.py -iF urls.txt -lcf
 ```
 
+### 结果保存
+
+1. 结果将保存在项目根目录下的`output`文件夹中
+2. 每一个目标生成一个txt，命名格式为`目标域名.txt`
+3. 结果自动去重复，不用担心产生大量冗余
+
 ## 高级使用(自定义dirmap配置)
 
 暂时采用加载配置文件的方式进行详细配置，**不支持使用命令行参数进行详细配置**！
 
-编辑根目录下的`dirmap.conf`，进行配置
+编辑项目根目录下的`dirmap.conf`，进行配置
 
 `dirmap.conf`配置详解
 
@@ -268,7 +273,15 @@ conf.debug = 0
 conf.update = 0
 ```
 
+# 已知缺点
+
+1. “爬虫模式”只爬取了目标的当前页面，用于生成动态字典。项目将来会将“爬虫模块”与“生成动态字典功能”分离。
+
 # 维护工作
 
 1. 若使用过程中出现问题，欢迎发issue
-2. 本项目正在维护，未来将会有新的功能改进，具体参照“功能特点”列表，未打勾项
+2. 本项目正在维护，未来将会有新的功能加入，具体参照“功能特点”列表，未打勾项
+
+# 赞赏作者
+
+![donate](doc/donate.jpg)
