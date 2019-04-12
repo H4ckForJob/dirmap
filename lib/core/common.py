@@ -5,11 +5,12 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-04-10 13:27:58
-@LastEditTime: 2019-04-11 19:56:58
+@LastEditTime: 2019-04-12 14:15:26
 '''
 
 import os.path
 import sys
+import urllib
 
 from lib.core.data import cmdLineOptions, conf, paths, payloads
 from lib.core.enums import COLOR
