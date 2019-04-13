@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-04-10 13:27:58
-@LastEditTime: 2019-04-11 15:02:26
+@LastEditTime: 2019-04-12 21:58:42
 '''
 
 import imp
@@ -67,7 +67,7 @@ def TargetRegister(args):
 
     #单目标入队
     if args.target_single:
-        msg = '[+] Load target : %s' % args.target_single
+        msg = '[+] Load target: %s' % args.target_single
         outputscreen.success(msg)
         conf.target.put(args.target_single)
 
@@ -77,7 +77,7 @@ def TargetRegister(args):
             msg = '[-] TargetFile not found: %s' % args.target_file
             outputscreen.error(msg)
             sys.exit()
-        msg = '[+] Load targets from : %s' % args.target_file
+        msg = '[+] Load targets from: %s' % args.target_file
         outputscreen.success(msg)
         with open(args.target_file, 'r', encoding='utf8') as f:
             targets = f.readlines()
@@ -99,7 +99,7 @@ def TargetRegister(args):
                     outputscreen.warning(msg)
                     sys.exit()
             
-            msg = '[+] Load targets from : %s' % args.target_range
+            msg = '[+] Load targets from: %s' % args.target_range
             outputscreen.success(msg)
 
             # save to conf
@@ -121,7 +121,7 @@ def TargetRegister(args):
             
             ip_range = IP('%s/%s'%(ip,ip_format[1]))
             
-            msg = '[+] Load targets from : %s' % args.target_network
+            msg = '[+] Load targets from: %s' % args.target_network
             outputscreen.success(msg)
             
             for i in ip_range:

@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-04-11 20:48:44
+@LastEditTime: 2019-04-12 22:08:31
 '''
 
 import configparser
@@ -146,6 +146,7 @@ def loadSingleDict(path):
     @return: 
     '''
     try:
+        outputscreen.success('[+] Load dict:{}'.format(path))
         #加载文件时，使用utf-8编码，防止出现编码问题
         with open(path,encoding='UTF-8') as single_file:
             return single_file.read().splitlines()
@@ -161,7 +162,7 @@ def loadMultDict(path):
     tmp_list = []
     try:
         for file in os.listdir(path):
-            tmp_list.extend(loadSingleDict(paths.DATA_PATH + conf.dict_mode_load_mult_dict+file))
+            tmp_list.extend(loadSingleDict(os.path.join(conf.dict_mode_load_mult_dict,file)))
         return tmp_list
     except  Exception as e:
         outputscreen.error('[x] plz check file path!\n[x] error:{}'.format(e))
@@ -291,6 +292,7 @@ def ScanModeHandler():
     @return: 
     '''
     if conf.dict_mode:
+        outputscreen.warning('[*] Use dict mode')
         if conf.dict_mode == 1:
             return loadSingleDict(conf.dict_mode_load_single_dict)
         elif conf.dict_mode == 2:
@@ -299,9 +301,11 @@ def ScanModeHandler():
             outputscreen.error("[-] You must select a dict")
             sys.exit()
     elif conf.blast_mode:
+        outputscreen.warning('[*] Use blast mode')
         return generateBlastDict()
     #TODO:递归爬取url
     elif conf.crawl_mode:
+        outputscreen.warning('[*] Use crawl mode')
         headers = {}
         headers["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
         response = requests.get(conf.url, headers=headers, timeout=5)
@@ -317,12 +321,14 @@ def ScanModeHandler():
                         payloads.crawl_mode_dynamic_fuzz_temp_dict.add(url)
         payloads.crawl_mode_dynamic_fuzz_temp_dict = payloads.crawl_mode_dynamic_fuzz_temp_dict - {'#', ''}
         #加载后缀，TODO:独立动态生成字典模块
+        #这里的路径考虑单独做一个配置文件
         loadSuffix(os.path.join(paths.DATA_PATH,'crawl_mode_suffix.txt'))
         #生成新url
         for i in payloads.crawl_mode_dynamic_fuzz_temp_dict:
             payloads.crawl_mode_dynamic_fuzz_dict.extend(generateCrawlDict(i))
         return payloads.crawl_mode_dynamic_fuzz_dict
     elif conf.fuzz_mode:
+        outputscreen.warning('[*] Use fuzz mode')
         if conf.fuzz_mode == 1:
             return generateFuzzDict(conf.fuzz_mode_load_single_dict)
     else:
