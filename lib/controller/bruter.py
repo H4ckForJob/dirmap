@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-04-14 11:52:12
+@LastEditTime: 2019-04-14 12:05:52
 '''
 
 import configparser
@@ -327,6 +327,9 @@ def ScanModeHandler():
             sys.exit()
     elif conf.blast_mode:
         outputscreen.warning('[*] Use blast mode')
+        outputscreen.warning('[*] Use char set: {}'.format(conf.blast_mode_custom_charset))
+        outputscreen.warning('[*] Use paylaod min length: {}'.format(conf.blast_mode_min))
+        outputscreen.warning('[*] Use paylaod max length: {}'.format(conf.blast_mode_max))
         return generateBlastDict()
     #TODO:递归爬取url
     elif conf.crawl_mode:
@@ -490,6 +493,7 @@ def bruter(url):
     #FIXME:设置后缀名。当前以拼接方式实现，遍历一遍payload。
     try:
         if conf.file_extension:
+            outputscreen.warning('[+] Use file extentsion: {}'.format(conf.file_extension))
             for i in range(len(payloads.all_payloads)):
                 payloads.all_payloads[i] += conf.file_extension
     except:
