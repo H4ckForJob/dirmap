@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-04-14 11:20:00
+@LastEditTime: 2019-04-14 11:52:12
 '''
 
 import configparser
@@ -312,6 +312,10 @@ def ScanModeHandler():
     @param {type} 
     @return: 
     '''
+    if conf.recursive_scan:
+        outputscreen.warning('[*] Use recursive scan: Yes')
+    else:
+        outputscreen.warning('[*] Use recursive scan: No')
     if conf.dict_mode:
         outputscreen.warning('[*] Use dict mode')
         if conf.dict_mode == 1:
