@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-04-12 22:08:31
+@LastEditTime: 2019-04-14 11:20:00
 '''
 
 import configparser
@@ -72,7 +72,7 @@ def loadConf():
     """
 
     conf.recursive_scan = eval(ConfigFileParser().recursive_scan())
-    conf.recursion_depth = eval(ConfigFileParser().recursion_depth())
+    conf.recursive_status_code = eval(ConfigFileParser().recursive_status_code())
     conf.exclude_subdirs = eval(ConfigFileParser().exclude_subdirs())
         
     conf.dict_mode = eval(ConfigFileParser().dict_mode())
@@ -109,12 +109,12 @@ def loadConf():
 
     conf.response_status_code = eval(ConfigFileParser().response_status_code())
     conf.response_header_content_type = eval(ConfigFileParser().response_header_content_type())
+    conf.response_size = eval(ConfigFileParser().response_size())
     conf.custom_404_page = eval(ConfigFileParser().custom_404_page())
     conf.custom_503_page = eval(ConfigFileParser().custom_503_page())
     conf.custom_response_page = eval(ConfigFileParser().custom_response_page())
     conf.skip_size = eval(ConfigFileParser().skip_size())
 
-    conf.proxy = eval(ConfigFileParser().proxy())
     conf.proxy_server = eval(ConfigFileParser().proxy_server())
 
     conf.debug = eval(ConfigFileParser().debug())
@@ -162,10 +162,18 @@ def loadMultDict(path):
     tmp_list = []
     try:
         for file in os.listdir(path):
-            tmp_list.extend(loadSingleDict(os.path.join(conf.dict_mode_load_mult_dict,file)))
+            #FIXME:这里解决dict和fuzz模式加载多字典问题，但是loadMultDict变得臃肿，后期需要处理
+            if conf.dict_mode and conf.fuzz_mode:
+                outputscreen.error('[x] Can not use dict and fuzz mode at the same time!')
+                sys.exit()
+            if conf.dict_mode == 2:
+                tmp_list.extend(loadSingleDict(os.path.join(conf.dict_mode_load_mult_dict,file)))
+            if conf.fuzz_mode == 2:
+                tmp_list.extend(loadSingleDict(os.path.join(conf.fuzz_mode_load_mult_dict,file)))
         return tmp_list
     except  Exception as e:
         outputscreen.error('[x] plz check file path!\n[x] error:{}'.format(e))
+        sys.exit()
 
 def loadSuffix(path):
     '''
@@ -272,9 +280,9 @@ def generateLengthDict(length):
             i = length - 1
             print_it = True
 
-def generateFuzzDict(path):
+def generateSingleFuzzDict(path):
     '''
-    @description: 生成fuzz字典
+    @description: 单字典。生成fuzz字典
     @param {type} 
     @return: 
     '''
@@ -282,6 +290,19 @@ def generateFuzzDict(path):
     #替换label进行fuzz字典生成
     if conf.fuzz_mode_label in fuzz_path:
         for i in loadSingleDict(path):
+            payloads.fuzz_mode_dict.append(fuzz_path.replace(conf.fuzz_mode_label,i))
+        return payloads.fuzz_mode_dict
+
+def generateMultFuzzDict(path):
+    '''
+    @description: 多字典。生成fuzz字典
+    @param {type} 
+    @return: 
+    '''
+    fuzz_path = urllib.parse.urlparse(conf.url).path
+    #替换label进行fuzz字典生成
+    if conf.fuzz_mode_label in fuzz_path:
+        for i in loadMultDict(path):
             payloads.fuzz_mode_dict.append(fuzz_path.replace(conf.fuzz_mode_label,i))
         return payloads.fuzz_mode_dict
 
@@ -330,7 +351,9 @@ def ScanModeHandler():
     elif conf.fuzz_mode:
         outputscreen.warning('[*] Use fuzz mode')
         if conf.fuzz_mode == 1:
-            return generateFuzzDict(conf.fuzz_mode_load_single_dict)
+            return generateSingleFuzzDict(conf.fuzz_mode_load_single_dict)
+        if conf.fuzz_mode == 2:
+            return generateMultFuzzDict(conf.fuzz_mode_load_mult_dict)
     else:
         outputscreen.error("[-] You must select a scan mode")
         sys.exit()
@@ -354,12 +377,17 @@ def responseHandler(response):
         return
     #自定义状态码显示
     if response.status_code in conf.response_status_code:
-        msg = '['+str(response.status_code)+']'+'['+response.headers['content-type']+']'+'['+str(size)+']'+response.url
+        msg = '['+str(response.status_code)+']'
+        if conf.response_header_content_type:
+            msg += '['+response.headers['content-type']+']'
+        if conf.response_size:
+            msg += '['+str(size)+']'
+        msg += response.url
         outputscreen.info('\r'+msg+' '*(th.console_width-len(msg)+1))
         #已去重复，结果保存。NOTE:此处使用response.url进行文件名构造，解决使用-iL参数时，不能按照域名来命名文件名的问题
         saveResults(urllib.parse.urlparse(response.url).netloc,msg)
     #关于递归扫描。响应在自定义状态码中时，添加判断是否进行递归扫描
-    if response.status_code in [301,403]:
+    if response.status_code in conf.recursive_status_code:
         if conf.recursive_scan:
             recursiveScan(response.url,payloads.all_payloads)
     #自定义正则匹配响应
@@ -407,7 +435,7 @@ def worker():
         #outputscreen.error('[x] timeout! url:{}'.format(payloads.current_payload))
         pass
     except Exception as e:
-        outputscreen.error('[x] error:{}'.format(e))
+        #outputscreen.error('[x] error:{}'.format(e))
         pass
     finally:
         #更新进度条
