@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-04-11 09:49:16
-@LastEditTime: 2019-04-11 10:26:33
+@LastEditTime: 2019-04-14 10:56:20
 '''
 
 from configparser import ConfigParser
@@ -27,8 +27,8 @@ class ConfigFileParser:
 
     def recursive_scan(self):
         return self._get_option('RecursiveScan','conf.recursive_scan')
-    def recursion_depth(self):
-        return self._get_option('RecursiveScan','conf.recursion_depth')
+    def recursive_status_code(self):
+        return self._get_option('RecursiveScan','conf.recursive_status_code')
     def exclude_subdirs(self):
         return self._get_option('RecursiveScan','conf.exclude_subdirs')
     
@@ -98,6 +98,8 @@ class ConfigFileParser:
         return self._get_option('ResponseHandler','conf.response_status_code')
     def response_header_content_type(self):
         return self._get_option('ResponseHandler','conf.response_header_content_type')
+    def response_size(self):
+        return self._get_option('ResponseHandler','conf.response_size')
     def custom_404_page(self):
         return self._get_option('ResponseHandler','conf.custom_404_page')
     def custom_503_page(self):
@@ -107,8 +109,6 @@ class ConfigFileParser:
     def skip_size(self):
         return self._get_option('ResponseHandler','conf.skip_size')
 
-    def proxy(self):
-        return self._get_option('ProxyHandler','conf.proxy')
     def proxy_server(self):
         return self._get_option('ProxyHandler','conf.proxy_server')
 
