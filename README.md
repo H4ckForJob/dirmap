@@ -303,14 +303,12 @@ conf.update = 0
 # 已知缺陷
 
 1. “爬虫模式”只爬取了目标的当前页面，用于生成动态字典。项目将来会将“爬虫模块”与“生成动态字典功能”分离。
-2. 在某些条件下运行，bruter.py第317行会报错，目前原因不明。
+2. 关于bruter.py第517行`bar.log.start()`出错。解决方案：请安装progressbar2。卸载progressbar。防止导入同名模块。感谢某位表哥提醒。
 
-```
-本人测试win10、ubuntu16.04下，使用git clone最后一个版本的代码，dirmap运行测试通过。若您在使用过程中出现该问题，请确保:
-1.安装的是python3.7.2版本
-2.所有模块最新。执行python3 -m pip install --upgrade -r requirement.txt(或者py -3 -m pip install --upgrade -r requirement.txt)
-3.最后检查系统环境变量下，是否配置正确。例如：安装的模块是否都到对应的python中了
-4.若进行过以上操作，还存在问题，请将您发一下issue，为了方便定位问题，issue中务必包含：环境信息+dirmap.conf配置+使用的代码commit版本hash，感谢！
+```shell
+执行命令：
+python3 -m pip uninstall progressbar
+python3 -m pip install progressbar2
 ```
 
 # 维护工作
