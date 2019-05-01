@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-04-10 13:27:58
-@LastEditTime: 2019-04-12 21:58:42
+@LastEditTime: 2019-05-01 20:19:16
 '''
 
 import imp
@@ -70,6 +70,7 @@ def TargetRegister(args):
         msg = '[+] Load target: %s' % args.target_single
         outputscreen.success(msg)
         conf.target.put(args.target_single)
+        conf.target_nums = conf.target.qsize()
 
     #多目标入队
     elif args.target_file:
@@ -79,10 +80,11 @@ def TargetRegister(args):
             sys.exit()
         msg = '[+] Load targets from: %s' % args.target_file
         outputscreen.success(msg)
-        with open(args.target_file, 'r', encoding='utf8') as f:
+        with open(args.target_file, 'r', encoding='utf-8') as f:
             targets = f.readlines()
             for target in targets:
                 conf.target.put(target.strip('\n'))
+        conf.target_nums = conf.target.qsize()
 
     #ip范围目标入队.e.g. 192.168.1.1-192.168.1.100
     elif args.target_range:
@@ -135,6 +137,6 @@ def TargetRegister(args):
         
     #验证目标数量
     if conf.target.qsize() == 0:
-        errormsg = msg = 'No targets found\nPlease load targets with [-iU|-iF|-iR|-iN] or use API with [-aZ|-aS|-aG|-aF]'
+        errormsg = msg = '[!] No targets found.Please load targets with [-iU|-iF|-iR|-iN]'
         outputscreen.error(errormsg)
         sys.exit()

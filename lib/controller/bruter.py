@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-05-01 18:40:11
+@LastEditTime: 2019-05-01 22:01:59
 '''
 
 import configparser
@@ -46,6 +46,9 @@ payloads.fuzz_mode_dict = list()
 tasks.all_task = Queue()
 tasks.task_length = 0
 tasks.task_count = 0
+
+#假性404页面md5列表
+conf.autodiscriminator_md5 = set()
 
 bar.log = progressbar.ProgressBar()
 
@@ -384,7 +387,7 @@ def responseHandler(response):
     
     #自动识别404-判断是否与获取404页面特征匹配
     if conf.auto_check_404_page:
-        if hashlib.md5(response.content).hexdigest() == conf.autodiscriminator_md5:
+        if hashlib.md5(response.content).hexdigest() in conf.autodiscriminator_md5:
             return
 
     #自定义状态码显示
@@ -469,8 +472,7 @@ def bruter(url):
     @param {url:目标} 
     @return: 
     '''
-    #全局target的url，给crawl、fuzz模块使用。FIXME
-    conf.url = url
+
     #url初始化
     conf.parsed_url = urllib.parse.urlparse(url)
     #填补协议
@@ -480,19 +482,18 @@ def bruter(url):
     #填补url后的/
     if not url.endswith('/'):
         url = url + '/'
-
+    #全局target的url，给crawl、fuzz模块使用。FIXME
+    conf.url = url
+    #打印当前target
+    outputscreen.success('[+] Current target: {}'.format(conf.url))
     #自动识别404-预先获取404页面特征
     if conf.auto_check_404_page:
         outputscreen.warning("[*] Launching auto check 404")
         # Autodiscriminator (probably deprecated by future diagnostic subsystem)
-        i = Inspector(url)
+        i = Inspector(conf.url)
         (result, notfound_type) = i.check_this()
-        if notfound_type == Inspector.TEST404_URL:
-            conf.autodiscriminator_location = result
-            outputscreen.success("[+] 404 ---> 302 ----> {}".format(conf.autodiscriminator_location))
-        elif notfound_type == Inspector.TEST404_MD5:
-            conf.autodiscriminator_md5 = result
-            outputscreen.success("[+] 404 ---> PAGE_MD5 ----> {}".format(conf.autodiscriminator_md5))
+        if notfound_type == Inspector.TEST404_MD5 or notfound_type == Inspector.TEST404_OK:
+            conf.autodiscriminator_md5.add(result)
 
     #加载payloads
     #添加payloads是否加载成功判断
@@ -531,7 +532,8 @@ def bruter(url):
         tasks.all_task.put(url_payload)
     #设置进度条长度，若是递归模式，则不设置任务队列长度，即无法显示进度，仅显示耗时
     if not conf.recursive_scan:
-        tasks.task_length = tasks.all_task.qsize()
+        #NOTE:这里取所有payloads的长度*target数量计算任务总数，修复issue#2
+        tasks.task_length = len(payloads.all_payloads)*conf.target_nums
         bar.log.start(tasks.task_length)
     #FIXME:循环任务数不能一次性取完所有的task，暂时采用每次执行30个任务。这样写还能解决hub.LoopExit的bug
     while not tasks.all_task.empty():

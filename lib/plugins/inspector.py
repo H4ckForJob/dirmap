@@ -5,16 +5,18 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-05-01 12:07:54
-@LastEditTime: 2019-05-01 18:25:17
+@LastEditTime: 2019-05-01 21:57:07
 '''
 
 import hashlib
 import random
 import sys
+import urllib
 
 import requests
 
 from lib.core.common import outputscreen
+from lib.core.data import th
 
 USER_AGENT = "Mozilla/5.0 (Windows; U; MSIE 10.0; Windows NT 9.0; es-ES)"
 user_agent = {"user-agent": USER_AGENT}
@@ -44,35 +46,47 @@ class Inspector:
         s = "".join(s)
         target = self.target + s
 
-        outputscreen.success("[+] Checking with %s" % target)
+        outputscreen.success("[+] Checking with: {}".format(target))
 
-        page = requests.get(target, headers=user_agent, verify=False)
-        content = page.content
+        try:
+            page = requests.get(target, headers=user_agent, verify=False,timeout=5)
+            content = page.content
+            result = {
+                    'target': urllib.parse.urlparse(target).netloc,
+                    'code': str(page.status_code),
+                    'size': len(content),
+                    'md5': hashlib.md5(content).hexdigest(),
+                    'content': content,
+                    'location': None
+                }
 
-        result = {'code': str(page.status_code),
-                  'size': len(content),
-                  'md5': hashlib.md5(content).hexdigest(),
-                  'content': content,
-                  'location': None}
-
-        if len(page.history) >= 1:
-            result['location'] = page.url
-
-        return result
+            if len(page.history) >= 1:
+                result['location'] = page.url
+            return result
+        except:
+            result = {
+                    'target': urllib.parse.urlparse(target).netloc,
+                    'code': '',
+                    'size': '',
+                    'md5': '',
+                    'content': '',
+                    'location': None
+                }
+            return result
 
     def check_this(self):
         """Get the a request and decide what to do"""
         first_result = self._give_it_a_try()
 
         if first_result['code'] == '404':
-            outputscreen.success("Got a nice 404, problems not expected")
+            #msg = '[+] Target: {} Got a nice 404, problems not expected'
+            #outputscreen.success("\r{}{}".format(self.target,' '*(th.console_width-len(msg)+len(self.target)+1)))
             # Ok, resquest gave a 404 so we should not find problems
             return '', Inspector.TEST404_OK
 
         elif first_result['code'] == '302' or first_result['location']:
             location = first_result['location']
             return location, Inspector.TEST404_URL
-
         else:
             return first_result['md5'], Inspector.TEST404_MD5
 
