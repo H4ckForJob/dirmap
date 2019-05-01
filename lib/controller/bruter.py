@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-05-01 22:01:59
+@LastEditTime: 2019-05-01 23:13:56
 '''
 
 import configparser
@@ -72,9 +72,11 @@ def saveResults(domain,msg):
             result_file.write(msg+'\n')
 
 def loadConf():
-    """
-    加载扫描配置(以后将使用参数，而非从文件加载)
-    """
+    '''
+    @description: 加载扫描配置(以后将使用参数，而非从文件加载)
+    @param {type} 
+    @return: 
+    '''
 
     conf.recursive_scan = eval(ConfigFileParser().recursive_scan())
     conf.recursive_status_code = eval(ConfigFileParser().recursive_status_code())
@@ -472,7 +474,8 @@ def bruter(url):
     @param {url:目标} 
     @return: 
     '''
-
+    #全局target的url，给crawl、fuzz模块使用。XXX:要放在填补url之前，否则fuzz模式会出现这样的问题：https://axblog.top/phpinfo.{dir}/
+    conf.url = url
     #url初始化
     conf.parsed_url = urllib.parse.urlparse(url)
     #填补协议
@@ -482,15 +485,14 @@ def bruter(url):
     #填补url后的/
     if not url.endswith('/'):
         url = url + '/'
-    #全局target的url，给crawl、fuzz模块使用。FIXME
-    conf.url = url
+
     #打印当前target
-    outputscreen.success('[+] Current target: {}'.format(conf.url))
+    outputscreen.success('[+] Current target: {}'.format(url))
     #自动识别404-预先获取404页面特征
     if conf.auto_check_404_page:
         outputscreen.warning("[*] Launching auto check 404")
         # Autodiscriminator (probably deprecated by future diagnostic subsystem)
-        i = Inspector(conf.url)
+        i = Inspector(url)
         (result, notfound_type) = i.check_this()
         if notfound_type == Inspector.TEST404_MD5 or notfound_type == Inspector.TEST404_OK:
             conf.autodiscriminator_md5.add(result)
@@ -528,6 +530,7 @@ def bruter(url):
             url_payload = conf.parsed_url.scheme + '://' + conf.parsed_url.netloc + payload
         else:
             url_payload = url + payload
+        #print(url_payload)
         #payload入队，等待处理
         tasks.all_task.put(url_payload)
     #设置进度条长度，若是递归模式，则不设置任务队列长度，即无法显示进度，仅显示耗时
