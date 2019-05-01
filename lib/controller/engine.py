@@ -5,18 +5,21 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-04-10 13:27:58
-@LastEditTime: 2019-04-11 14:20:32
+@LastEditTime: 2019-05-01 18:42:38
 '''
 
-import gevent
 import sys
 import time
 import traceback
-from lib.core.data import conf,paths,th
+
+import gevent
+
+from lib.controller.bruter import bruter
 from lib.core.common import outputscreen
+from lib.core.data import conf, paths, th
 from lib.core.enums import BRUTER_RESULT_STATUS
 from lib.utils.console import getTerminalSize
-from lib.controller.bruter import bruter
+
 
 def initEngine():
     # init control parameter

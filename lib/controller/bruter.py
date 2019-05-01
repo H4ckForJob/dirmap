@@ -5,10 +5,11 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-04-14 12:05:52
+@LastEditTime: 2019-05-01 18:40:11
 '''
 
 import configparser
+import hashlib
 import os
 import random
 import re
@@ -25,6 +26,7 @@ from lxml import etree
 from lib.core.common import intToSize, outputscreen, urlSimilarCheck
 from lib.core.data import bar, conf, paths, payloads, tasks, th
 from lib.utils.config import ConfigFileParser
+from lib.plugins.inspector import Inspector
 
 #防止ssl未校验时出现提示信息
 requests.packages.urllib3.disable_warnings()
@@ -110,7 +112,7 @@ def loadConf():
     conf.response_status_code = eval(ConfigFileParser().response_status_code())
     conf.response_header_content_type = eval(ConfigFileParser().response_header_content_type())
     conf.response_size = eval(ConfigFileParser().response_size())
-    conf.custom_404_page = eval(ConfigFileParser().custom_404_page())
+    conf.auto_check_404_page = eval(ConfigFileParser().auto_check_404_page())
     conf.custom_503_page = eval(ConfigFileParser().custom_503_page())
     conf.custom_response_page = eval(ConfigFileParser().custom_response_page())
     conf.skip_size = eval(ConfigFileParser().skip_size())
@@ -306,7 +308,7 @@ def generateMultFuzzDict(path):
             payloads.fuzz_mode_dict.append(fuzz_path.replace(conf.fuzz_mode_label,i))
         return payloads.fuzz_mode_dict
 
-def ScanModeHandler():
+def scanModeHandler():
     '''
     @description: 选择扫描模式，加载payloads，一次只能加载一个模式，TODO:可一次运行多个模式
     @param {type} 
@@ -379,16 +381,19 @@ def responseHandler(response):
     #跳过大小为skip_size的页面
     if size == conf.skip_size:
         return
-    #自定义404页面
-    if conf.custom_404_page in response.text:
-        return
+    
+    #自动识别404-判断是否与获取404页面特征匹配
+    if conf.auto_check_404_page:
+        if hashlib.md5(response.content).hexdigest() == conf.autodiscriminator_md5:
+            return
+
     #自定义状态码显示
     if response.status_code in conf.response_status_code:
-        msg = '['+str(response.status_code)+']'
+        msg = '[{}]'.format(str(response.status_code))
         if conf.response_header_content_type:
-            msg += '['+response.headers['content-type']+']'
+            msg += '[{}]'.format(response.headers['content-type'])
         if conf.response_size:
-            msg += '['+str(size)+']'
+            msg += '[{}]'.format(str(size))
         msg += response.url
         outputscreen.info('\r'+msg+' '*(th.console_width-len(msg)+1))
         #已去重复，结果保存。NOTE:此处使用response.url进行文件名构造，解决使用-iL参数时，不能按照域名来命名文件名的问题
@@ -464,7 +469,7 @@ def bruter(url):
     @param {url:目标} 
     @return: 
     '''
-    #全局url，给crawl、fuzz模块使用。FIXME
+    #全局target的url，给crawl、fuzz模块使用。FIXME
     conf.url = url
     #url初始化
     conf.parsed_url = urllib.parse.urlparse(url)
@@ -476,9 +481,22 @@ def bruter(url):
     if not url.endswith('/'):
         url = url + '/'
 
+    #自动识别404-预先获取404页面特征
+    if conf.auto_check_404_page:
+        outputscreen.warning("[*] Launching auto check 404")
+        # Autodiscriminator (probably deprecated by future diagnostic subsystem)
+        i = Inspector(url)
+        (result, notfound_type) = i.check_this()
+        if notfound_type == Inspector.TEST404_URL:
+            conf.autodiscriminator_location = result
+            outputscreen.success("[+] 404 ---> 302 ----> {}".format(conf.autodiscriminator_location))
+        elif notfound_type == Inspector.TEST404_MD5:
+            conf.autodiscriminator_md5 = result
+            outputscreen.success("[+] 404 ---> PAGE_MD5 ----> {}".format(conf.autodiscriminator_md5))
+
     #加载payloads
     #添加payloads是否加载成功判断
-    payloads.all_payloads = ScanModeHandler()
+    payloads.all_payloads = scanModeHandler()
     if payloads.all_payloads == None:
         outputscreen.error('[x] load payloads error!')
         if conf.dict_mode:

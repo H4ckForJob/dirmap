@@ -100,8 +100,8 @@ class ConfigFileParser:
         return self._get_option('ResponseHandler','conf.response_header_content_type')
     def response_size(self):
         return self._get_option('ResponseHandler','conf.response_size')
-    def custom_404_page(self):
-        return self._get_option('ResponseHandler','conf.custom_404_page')
+    def auto_check_404_page(self):
+        return self._get_option('ResponseHandler','conf.auto_check_404_page')
     def custom_503_page(self):
         return self._get_option('ResponseHandler','conf.custom_503_page')
     def custom_response_page(self):

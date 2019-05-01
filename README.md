@@ -172,9 +172,9 @@ conf.response_header_content_type = 1
 #是否记录页面大小。默认配置1记录
 #conf.response_size = 0
 conf.response_size = 1
-#自定义匹配404页面正则
-#conf.custom_404_page = "fake 404"
-conf.custom_404_page = ""
+#是否自动检测404页面。默认配置True，开启自动检测404.其他配置参考e.g:True;False
+#conf.auto_check_404_page = False
+conf.auto_check_404_page = True
 #自定义匹配503页面正则。暂未实现。感觉用不着，可能要废弃。
 #conf.custom_503_page = "page 503"
 conf.custom_503_page = ""
@@ -262,7 +262,7 @@ conf.update = 0
     - [ ] 字典处理(payload修改-去除非字母数字)
   - [ ] 响应结果处理模块(ResponseHandler)
     - [x] 跳过大小为x字节的文件(-ss,skip_size)
-    - [x] 自定义404页面(-c4p,custom_404_page)
+    - [x] 自动检测404页面(-ac4p,auto_check_404_page)
     - [ ] 自定义503页面(-c5p,custom_503_page)
     - [ ] 自定义正则匹配响应内容并进行某种操作
       - [x] 自定义正则匹配响应(-crp,custom_response_page)
