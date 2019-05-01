@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-05-01 23:13:56
+@LastEditTime: 2019-05-01 23:51:39
 '''
 
 import configparser
@@ -320,9 +320,11 @@ def scanModeHandler():
     @return: 
     '''
     if conf.recursive_scan:
-        outputscreen.warning('[*] Use recursive scan: Yes')
+        msg = '[*] Use recursive scan: Yes'
+        outputscreen.warning('\r'+msg+' '*(th.console_width-len(msg)+1))
     else:
-        outputscreen.warning('[*] Use recursive scan: No')
+        msg = '[*] Use recursive scan: No'
+        outputscreen.warning('\r'+msg+' '*(th.console_width-len(msg)+1))
     if conf.dict_mode:
         outputscreen.warning('[*] Use dict mode')
         if conf.dict_mode == 1:
@@ -487,7 +489,8 @@ def bruter(url):
         url = url + '/'
 
     #打印当前target
-    outputscreen.success('[+] Current target: {}'.format(url))
+    msg = '[+] Current target: {}'.format(url)
+    outputscreen.success('\r'+msg+' '*(th.console_width-len(msg)+1))
     #自动识别404-预先获取404页面特征
     if conf.auto_check_404_page:
         outputscreen.warning("[*] Launching auto check 404")

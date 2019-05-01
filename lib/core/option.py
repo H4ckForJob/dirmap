@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-04-10 13:27:58
-@LastEditTime: 2019-05-01 20:19:16
+@LastEditTime: 2019-05-01 23:39:56
 '''
 
 import imp
@@ -107,6 +107,7 @@ def TargetRegister(args):
             # save to conf
             for target in lists:
                 conf.target.put(target)
+            conf.target_nums = conf.target.qsize()
         except:
             helpmsg = "Invalid input in [-iR], Example: -iR 192.168.1.1-192.168.1.100"
             outputscreen.error(helpmsg)
@@ -128,6 +129,7 @@ def TargetRegister(args):
             
             for i in ip_range:
                 conf.target.put(i)
+            conf.target_nums = conf.target.qsize()
         except:
             msg = "[-] Invalid input in [-iN], Example: -iN 192.168.1.0/24"
             outputscreen.error(msg)
