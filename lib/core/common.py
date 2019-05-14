@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-04-10 13:27:58
-@LastEditTime: 2019-04-12 14:15:26
+@LastEditTime: 2019-05-14 13:43:01
 '''
 
 import os.path
@@ -113,7 +113,7 @@ def urlSimilarCheck(url):
     '''
     @description: url相似度分析，当url路径和参数键值类似时，则判为重复，参考某人爬虫
     @param {type} 
-    @return: 
+    @return: 非重复返回True
     '''
     url_struct = urllib.parse.urlparse(url)
     query_key = '|'.join(sorted([i.split('=')[0] for i in url_struct.query.split('&')]))

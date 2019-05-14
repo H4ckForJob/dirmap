@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-05-13 15:23:36
+@LastEditTime: 2019-05-14 16:07:54
 '''
 
 import configparser
@@ -46,6 +46,9 @@ payloads.fuzz_mode_dict = list()
 tasks.all_task = Queue()
 tasks.task_length = 0
 tasks.task_count = 0
+
+#创建crawl_tasks队列
+tasks.crawl_task = Queue()
 
 #假性404页面md5列表
 conf.autodiscriminator_md5 = set()
@@ -93,6 +96,7 @@ def loadConf():
     conf.blast_mode_custom_charset = eval(ConfigFileParser().blast_mode_custom_charset())
     conf.blast_mode_resume_charset = eval(ConfigFileParser().blast_mode_resume_charset())
     conf.crawl_mode = eval(ConfigFileParser().crawl_mode())
+    conf.crawl_mode_dynamic_fuzz_suffix = eval(ConfigFileParser().crawl_mode_dynamic_fuzz_suffix())
     conf.crawl_mode_parse_robots = eval(ConfigFileParser().crawl_mode_parse_robots())
     conf.crawl_mode_parse_html = eval(ConfigFileParser().crawl_mode_parse_html())
     conf.crawl_mode_dynamic_fuzz = eval(ConfigFileParser().crawl_mode_dynamic_fuzz())
@@ -159,6 +163,7 @@ def loadSingleDict(path):
             return single_file.read().splitlines()
     except Exception as e:
         outputscreen.error('[x] plz check file path!\n[x] error:{}'.format(e))
+        sys.exit()
 
 def loadMultDict(path):
     '''
@@ -194,6 +199,7 @@ def loadSuffix(path):
             payloads.suffix = set(f.read().split('\n')) - {'', '#'}
     except  Exception as e:
         outputscreen.error('[x] plz check file path!\n[x] error:{}'.format(e))
+        sys.exit()
 
 def generateCrawlDict(base_url):
     '''
@@ -244,7 +250,7 @@ def generateBlastDict():
     if conf.blast_mode_resume_charset != '':
         the_min = len(conf.blast_mode_resume_charset)
         if conf.blast_mode_min > the_min or conf.blast_mode_max < the_min:
-            outputscreen.error('\n invalid resume length: %d\n\n' % the_min)
+            outputscreen.error('[+] Invalid resume length: %d\n\n' % the_min)
             the_min = conf.blast_mode_min
             conf.blast_mode_resume_charset = ''
     for length in range(the_min, conf.blast_mode_max + 1):
@@ -263,7 +269,7 @@ def generateLengthDict(length):
         #enumerate()用于将一个可遍历的数据对象(如列表、元组或字符串)组合为一个索引序列
         for i, letter in enumerate(conf.blast_mode_resume_charset):
             if conf.blast_mode_custom_charset.find(letter) == -1:
-                outputscreen.error('\n invalid resume string: "%s"\n\n' % conf.blast_mode_resume_charset)
+                outputscreen.error('[+] Invalid resume string: "%s"\n\n' % conf.blast_mode_resume_charset)
                 lst = [0] * length
                 break
             lst[i] = conf.blast_mode_custom_charset.find(letter)
@@ -343,27 +349,55 @@ def scanModeHandler():
     #TODO:递归爬取url
     elif conf.crawl_mode:
         outputscreen.warning('[*] Use crawl mode')
+        #自定义header
         headers = {}
-        headers["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
-        response = requests.get(conf.url, headers=headers, timeout=5)
+        if conf.request_headers:
+            try:
+                for header in conf.request_headers.split(','):
+                    k, v = header.split('=')
+                    #print(k,v)
+                    headers[k] = v
+            except Exception as e:
+                outputscreen.error("[x] Check personalized headers format: header=value,header=value.\n[x] error:{}".format(e))
+                sys.exit()
+        #自定义ua
+        if conf.request_header_ua:
+            headers['User-Agent'] = conf.request_header_ua
+        #自定义cookie
+        if conf.request_header_cookie:
+            headers['Cookie'] = conf.request_header_cookie
+        try:
+            response = requests.get(conf.url, headers=headers, timeout=conf.request_timeout)
+        except requests.exceptions.ConnectionError as e:
+            outputscreen.error("[x] Crawler network connection error!plz check whether the target is accessible")
+            sys.exit()
+
+        #处理爬虫动态字典生成
         if response.status_code in conf.response_status_code:
-            html = etree.HTML(response.text)
+            html = etree.HTML(response.content.decode('utf-8'))
             #加载自定义xpath用于解析html
             urls = html.xpath(conf.crawl_mode_parse_html)
             for url in urls:
                 #去除相似url
                 if urlSimilarCheck(url):
-                    #判断:1.是否同域名 2.netloc是否为空(值空时为同域).。若满足1和2，则添加到temp payload
+                    #判断:1.是否同域名 2.netloc是否为空(值空时为同域)。若满足1或2，则添加到temp payload
                     if (urllib.parse.urlparse(url).netloc == urllib.parse.urlparse(conf.url).netloc) or urllib.parse.urlparse(url).netloc == '':
                         payloads.crawl_mode_dynamic_fuzz_temp_dict.add(url)
         payloads.crawl_mode_dynamic_fuzz_temp_dict = payloads.crawl_mode_dynamic_fuzz_temp_dict - {'#', ''}
-        #加载后缀，TODO:独立动态生成字典模块
-        #这里的路径考虑单独做一个配置文件
-        loadSuffix(os.path.join(paths.DATA_PATH,'crawl_mode_suffix.txt'))
-        #生成新url
-        for i in payloads.crawl_mode_dynamic_fuzz_temp_dict:
-            payloads.crawl_mode_dynamic_fuzz_dict.extend(generateCrawlDict(i))
-        return payloads.crawl_mode_dynamic_fuzz_dict
+        if conf.crawl_mode_dynamic_fuzz:
+            #加载动态fuzz后缀，TODO:独立动态生成字典模块
+            loadSuffix(os.path.join(paths.DATA_PATH,conf.crawl_mode_dynamic_fuzz_suffix))
+            #生成新爬虫动态字典
+            for i in payloads.crawl_mode_dynamic_fuzz_temp_dict:
+                payloads.crawl_mode_dynamic_fuzz_dict.extend(generateCrawlDict(i))
+            for i in payloads.crawl_mode_dynamic_fuzz_temp_dict:
+                payloads.crawl_mode_dynamic_fuzz_dict.append(urllib.parse.urlparse(i).path)
+            return set(payloads.crawl_mode_dynamic_fuzz_dict)
+        else:
+            for i in payloads.crawl_mode_dynamic_fuzz_temp_dict:
+                payloads.crawl_mode_dynamic_fuzz_dict.append(urllib.parse.urlparse(i).path)
+            return set(payloads.crawl_mode_dynamic_fuzz_dict)
+
     elif conf.fuzz_mode:
         outputscreen.warning('[*] Use fuzz mode')
         if conf.fuzz_mode == 1:
@@ -412,8 +446,8 @@ def responseHandler(response):
             recursiveScan(response.url,payloads.all_payloads)
     #自定义正则匹配响应
     pattern = re.compile(conf.custom_response_page)
-    if pattern.search(response.text):
-        outputscreen.info('[!] custom response information matched\n[!] use regular expression:{}\n[!] matched page:{}'.format(conf.custom_response_page,response.text))
+    if pattern.search(response.content.decode('utf-8')):
+        outputscreen.info('[!] Custom response information matched\n[!] use regular expression:{}\n[!] matched page:{}'.format(conf.custom_response_page,response.text))
 
 def worker():
     '''
@@ -429,7 +463,7 @@ def worker():
         try:
             for header in conf.request_headers.split(','):
                 k, v = header.split('=')
-                print(k,v)
+                #print(k,v)
                 headers[k] = v
         except Exception as e:
             outputscreen.error("[x] Check personalized headers format: header=value,header=value.\n[x] error:{}".format(e))
@@ -477,7 +511,7 @@ def bruter(url):
     @param {url:目标} 
     @return: 
     '''
-    #全局target的url，给crawl、fuzz模块使用。XXX:要放在填补url之前，否则fuzz模式会出现这样的问题：https://axblog.top/phpinfo.{dir}/
+    #全局target的url，给crawl、fuzz模块使用。XXX:要放在填补url之前，否则fuzz模式会出现这样的问题：https://target.com/phpinfo.{dir}/
     conf.url = url
     #url初始化
     conf.parsed_url = urllib.parse.urlparse(url)
@@ -523,6 +557,7 @@ def bruter(url):
                 payloads.all_payloads[i] += conf.file_extension
     except:
         outputscreen.error('[+] plz check extension!')
+        sys.exit()
     #debug模式，打印所有payload，并退出
     if conf.debug:
         outputscreen.blue('[+] all payloads:{}'.format(payloads.all_payloads))

@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-04-11 09:49:16
-@LastEditTime: 2019-04-14 10:56:20
+@LastEditTime: 2019-05-14 14:16:02
 '''
 
 from configparser import ConfigParser
@@ -54,6 +54,8 @@ class ConfigFileParser:
         return self._get_option('ScanModeHandler','conf.blast_mode_resume_charset')
     def crawl_mode(self):
         return self._get_option('ScanModeHandler','conf.crawl_mode')
+    def crawl_mode_dynamic_fuzz_suffix(self):
+        return self._get_option('ScanModeHandler','conf.crawl_mode_dynamic_fuzz_suffix')
     def crawl_mode_parse_robots(self):
         return self._get_option('ScanModeHandler','conf.crawl_mode_parse_robots')
     def crawl_mode_parse_html(self):
