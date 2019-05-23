@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-05-23 14:27:46
+@LastEditTime: 2019-05-23 14:49:27
 '''
 
 import configparser
@@ -367,7 +367,7 @@ def scanModeHandler():
         if conf.request_header_cookie:
             headers['Cookie'] = conf.request_header_cookie
         try:
-            response = requests.get(headers=headers, timeout=conf.request_timeout, verify=False, allow_redirects=conf.redirection_302, proxies=conf.proxy_server)
+            response = requests.get(conf.url, headers=headers, timeout=conf.request_timeout, verify=False, allow_redirects=conf.redirection_302, proxies=conf.proxy_server)
         except requests.exceptions.ConnectionError as e:
             outputscreen.error("[x] Crawler network connection error!plz check whether the target is accessible")
             sys.exit()
@@ -519,14 +519,15 @@ def bruter(url):
     @param {url:目标} 
     @return: 
     '''
-    #全局target的url，给crawl、fuzz模块使用。XXX:要放在填补url之前，否则fuzz模式会出现这样的问题：https://target.com/phpinfo.{dir}/
-    conf.url = url
+
     #url初始化
     conf.parsed_url = urllib.parse.urlparse(url)
     #填补协议
     if conf.parsed_url.scheme != 'http' and conf.parsed_url.scheme != 'https':
         url = 'http://' + url
         conf.parsed_url = urllib.parse.urlparse(url)
+    #全局target的url，给crawl、fuzz模块使用。XXX:要放在填补url之前，否则fuzz模式会出现这样的问题：https://target.com/phpinfo.{dir}/
+    conf.url = url
     #填补url后的/
     if not url.endswith('/'):
         url = url + '/'
