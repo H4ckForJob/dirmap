@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-05-14 16:07:54
+@LastEditTime: 2019-05-23 14:27:46
 '''
 
 import configparser
@@ -159,7 +159,7 @@ def loadSingleDict(path):
     try:
         outputscreen.success('[+] Load dict:{}'.format(path))
         #加载文件时，使用utf-8编码，防止出现编码问题
-        with open(path,encoding='UTF-8') as single_file:
+        with open(path,encoding='utf-8') as single_file:
             return single_file.read().splitlines()
     except Exception as e:
         outputscreen.error('[x] plz check file path!\n[x] error:{}'.format(e))
@@ -367,14 +367,21 @@ def scanModeHandler():
         if conf.request_header_cookie:
             headers['Cookie'] = conf.request_header_cookie
         try:
-            response = requests.get(conf.url, headers=headers, timeout=conf.request_timeout)
+            response = requests.get(headers=headers, timeout=conf.request_timeout, verify=False, allow_redirects=conf.redirection_302, proxies=conf.proxy_server)
         except requests.exceptions.ConnectionError as e:
             outputscreen.error("[x] Crawler network connection error!plz check whether the target is accessible")
             sys.exit()
 
-        #处理爬虫动态字典生成
+        #获取页面url
         if response.status_code in conf.response_status_code:
-            html = etree.HTML(response.content.decode('utf-8'))
+            try:
+                contentDecode = response.content.decode('utf-8')
+            except UnicodeDecodeError:
+                try:
+                    contentDecode = response.content.decode('gbk')
+                except:
+                    outputscreen.error("[x] Unrecognized page coding errors")
+            html = etree.HTML(contentDecode)
             #加载自定义xpath用于解析html
             urls = html.xpath(conf.crawl_mode_parse_html)
             for url in urls:
@@ -444,6 +451,7 @@ def responseHandler(response):
     if response.status_code in conf.recursive_status_code:
         if conf.recursive_scan:
             recursiveScan(response.url,payloads.all_payloads)
+
     #自定义正则匹配响应
     pattern = re.compile(conf.custom_response_page)
     if pattern.search(response.content.decode('utf-8')):
@@ -572,7 +580,7 @@ def bruter(url):
         #print(url_payload)
         #payload入队，等待处理
         tasks.all_task.put(url_payload)
-    #设置进度条长度，若是递归模式，则不设置任务队列长度，即无法显示进度，仅显示耗时
+    #设置进度条长度，若是递归模式或爬虫模式，则不设置任务队列长度，即无法显示进度，仅显示耗时
     if not conf.recursive_scan:
         #NOTE:这里取所有payloads的长度*target数量计算任务总数，修复issue#2
         tasks.task_length = len(payloads.all_payloads)*conf.target_nums
