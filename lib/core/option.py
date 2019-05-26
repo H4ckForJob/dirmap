@@ -66,7 +66,7 @@ def TargetRegister(args):
     #初始化目标队列
     conf.target = queue.Queue()
 
-    # 识别目标并入队
+    # 用户输入入队
     if args.target_input:
         # 尝试解析目标地址
         try:
