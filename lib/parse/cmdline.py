@@ -24,14 +24,10 @@ def cmdLineParser():
 
     # target
     target = parser.add_argument_group("Target","Target config")
-    target.add_argument("-iU", metavar="TARGET", dest="target_single", type=str, default="",
-                        help="scan a single target (e.g. http://target.com)")
+    target.add_argument("-i", metavar="TARGET", dest="target_input", type=str, default="",
+                        help="scan a target or network (e.g. [http://]target.com , 192.168.1.1[/24] , 192.168.1.1-192.168.1.100)")
     target.add_argument("-iF", metavar="FILE", dest="target_file", type=str, default="",
                         help="load targets from targetFile (e.g. urls.txt)")
-    target.add_argument("-iR", metavar="START-END", dest="target_range", type=str, default="",
-                        help="array from int(start) to int(end) (e.g. 192.168.1.1-192.168.2.100)")
-    target.add_argument("-iN", metavar="IP/MASK", dest="target_network", type=str, default="",
-                        help="generate IP from IP/MASK. (e.g. 192.168.1.0/24)")
 
     # bruter
     bruter = parser.add_argument_group("Bruter", "Bruter config")

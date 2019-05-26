@@ -11,6 +11,8 @@
 import os.path
 import sys
 import urllib
+import ipaddress
+import re
 
 from lib.core.data import cmdLineOptions, conf, paths, payloads
 from lib.core.enums import COLOR
@@ -66,19 +68,19 @@ def setPaths():
         msg = 'Config files missing, it may cause an issue.\n'
         outputscreen.error(msg)
         sys.exit(0)
-    
+
     #print(root_path,paths.DATA_PATH,paths.SCRIPT_PATH,paths.OUTPUT_PATH,paths.CONFIG_PATH)
     #print(paths.WEAK_PASS,paths.LARGE_WEAK_PASS,paths.UA_LIST_PATH)
 
 def banner():
     '''
     @description: 打印banner
-    @param {type} 
-    @return: 
+    @param {type}
+    @return:
     '''
     outputscreen.blue(BANNER)
 
-# 将'192.168.1.1 -192.168.1.100'分解成ip地址列表
+# 将'192.168.1.1-192.168.1.100'分解成ip地址列表
 def genIP(ip_range):
     '''
     print (genIP('192.18.1.1-192.168.1.3'))
@@ -87,19 +89,43 @@ def genIP(ip_range):
     # from https://segmentfault.com/a/1190000010324211
     def num2ip (num):
         return '%s.%s.%s.%s' % ((num >> 24) & 0xff, (num >> 16) & 0xff, (num >> 8) & 0xff, (num & 0xff))
-    
+
     def ip2num(ip):
         ips = [int(x) for x in ip.split('.')]
         return ips[0]<< 24 | ips[1]<< 16 | ips[2] << 8 | ips[3]
 
     start ,end = [ip2num(x) for x in ip_range.split('-')]
     return [num2ip(num) for num in range(start,end+1) if num & 0xff]
-    
+
+# 识别目标，转换成列表形式
+def parseTarget(target):
+    lists=[]
+    # 尝试解析url
+    try:
+        url=urllib.parse.urlparse(target)
+        # 处理Unicode域名
+        url_re=re.compile("((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,63}",re.I)
+        if url_re.search(url.path.encode('idna').decode()):
+            lists.append(target)
+        else:
+            # 非域名，尝试解析IP/子网
+            # e.g. 192.168.1.1 or 192.168.1.1/24
+            lists=list(ipaddress.ip_interface(target).network)
+    except:
+        # 尝试按网络范围处理
+        # e.g. 192.168.1.1-192.168.1.100
+        try:
+            lists=genIP(target)
+        except:
+            # 识别失败
+            pass
+    return lists
+
 def intToSize(bytes):
     '''
     @description: bits大小转换，对人类友好
-    @param {type} 
-    @return: 
+    @param {type}
+    @return:
     '''
     b = 1024 * 1024 * 1024 * 1024
     a = ['t','g','m','k','']
@@ -112,7 +138,7 @@ def intToSize(bytes):
 def urlSimilarCheck(url):
     '''
     @description: url相似度分析，当url路径和参数键值类似时，则判为重复，参考某人爬虫
-    @param {type} 
+    @param {type}
     @return: 非重复返回True
     '''
     url_struct = urllib.parse.urlparse(url)
