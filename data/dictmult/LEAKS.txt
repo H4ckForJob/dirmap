@@ -8,6 +8,7 @@ druid/index.html
 .DS_store
 .DS_Store
 .git
+.git/config
 .hg
 .idea
 .index.asp.swp

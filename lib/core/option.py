@@ -110,6 +110,6 @@ def TargetRegister(args):
 
     #验证目标数量
     if conf.target.qsize() == 0:
-        errormsg = msg = '[!] No targets found.Please load targets with [-iU|-iF|-iR|-iN]'
+        errormsg = msg = '[!] No targets found.Please load targets with [-i|-iF]'
         outputscreen.error(errormsg)
         sys.exit()

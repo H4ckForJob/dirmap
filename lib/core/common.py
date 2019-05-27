@@ -105,7 +105,8 @@ def parseTarget(target):
         url=urllib.parse.urlparse(target)
         # 处理Unicode域名
         url_re=re.compile("((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,63}",re.I)
-        if url_re.search(url.path.encode('idna').decode()):
+        ipv4_re=re.compile("(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])")
+        if url_re.search(url.path.encode('idna').decode()) or ipv4_re.search(url.path.encode('idna').decode()):
             lists.append(target)
         else:
             # 非域名，尝试解析IP/子网
