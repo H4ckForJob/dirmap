@@ -82,6 +82,7 @@ def loadConf():
     '''
 
     conf.recursive_scan = eval(ConfigFileParser().recursive_scan())
+    conf.recursive_scan_len = eval(ConfigFileParser().recursive_scan_len())
     conf.recursive_status_code = eval(ConfigFileParser().recursive_status_code())
     conf.exclude_subdirs = eval(ConfigFileParser().exclude_subdirs())
 
@@ -147,8 +148,10 @@ def recursiveScan(response_url,all_payloads):
         #payload容错，添加正斜杠前缀
         if not payload.startswith('/'):
             payload = '/' + payload
-        #拼接payload，并入队tasks
-        tasks.all_task.put(response_url + payload)
+        #拼接payload，限制长度，并入队tasks
+        newpayload=response_url+payload
+        if(len(newpayload) < int(conf.recursive_scan_len)):
+            tasks.all_task.put(response_url + payload)
 
 def loadSingleDict(path):
     '''
