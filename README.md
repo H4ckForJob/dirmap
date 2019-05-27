@@ -54,17 +54,37 @@ git clone https://github.com/H4ckForJob/dirmap.git && cd dirmap && python3 -m pi
 
 ## 快速使用
 
-### 单个目标
+### 输入目标
+
+单目标，默认为http
 
 ```shell
-python3 dirmap.py -iU https://target.com -lcf
+python3 dirmap.py -i https://target.com -lcf
 ```
-
-### 多个目标
 
 ```shell
-python3 dirmap.py -iF urls.txt -lcf
+python3 dirmap.py -i 192.168.1.1 -lcf
 ```
+
+子网
+
+```shell
+python3 dirmap.py -i 192.168.1.0/24 -lcf
+```
+
+网络范围
+
+```shell
+python3 dirmap.py -i 192.168.1.1-192.168.1.100 -lcf
+```
+
+### 文件读取
+
+```shell
+python3 dirmap.py -iF targets.txt -lcf
+```
+
+`targets.txt`中支持上述格式
 
 ### 结果保存
 
