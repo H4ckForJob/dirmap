@@ -29,9 +29,11 @@ class ConfigFileParser:
         return self._get_option('RecursiveScan','conf.recursive_scan')
     def recursive_status_code(self):
         return self._get_option('RecursiveScan','conf.recursive_status_code')
+    def recursive_scan_len(self):
+        return self._get_option('RecursiveScan','conf.recursive_scan_len')
     def exclude_subdirs(self):
         return self._get_option('RecursiveScan','conf.exclude_subdirs')
-    
+
     def dict_mode(self):
         return self._get_option('ScanModeHandler','conf.dict_mode')
     def dict_mode_load_single_dict(self):
