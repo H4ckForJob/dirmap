@@ -107,7 +107,7 @@ def TargetRegister(args):
                 target=target.strip('\n')
                 parsed_target=parseTarget(target)
                 for i in parsed_target:
-                    conf.target.put(target)
+                    conf.target.put(i)
         conf.target_nums = conf.target.qsize()
 
     #验证目标数量
