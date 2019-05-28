@@ -13,9 +13,10 @@ import os
 import queue
 import sys
 import time
+import ipaddress
 
 from lib.controller.bruter import loadConf
-from lib.core.common import genIP, outputscreen
+from lib.core.common import parseTarget, outputscreen
 from lib.core.data import conf, paths
 from thirdlib.IPy.IPy import IP
 
@@ -36,14 +37,14 @@ def EngineRegister(args):
         msg = '[*] Invalid input in [-t](range: 1 to 200), has changed to default(30)'
         outputscreen.warning(msg)
         conf.thread_num = 30
-        return 
+        return
     conf.thread_num = args.thread_num
 
 def BruterRegister(args):
     """
     配置bruter模块
     """
-        
+
     if args.load_config_file:
         #加载配置文件
         loadConf()
@@ -61,18 +62,38 @@ def TargetRegister(args):
     """
     msg = '[*] Initialize targets...'
     outputscreen.warning(msg)
-    
+
     #初始化目标队列
     conf.target = queue.Queue()
 
-    #单目标入队
-    if args.target_single:
-        msg = '[+] Load target: %s' % args.target_single
+    # 用户输入入队
+    if args.target_input:
+        # 尝试解析目标地址
+        try:
+            lists=parseTarget(args.target_input)
+        except:
+            helpmsg = "Invalid input in [-i], Example: -i [http://]target.com or 192.168.1.1[/24] or 192.168.1.1-192.168.1.100"
+            outputscreen.error(helpmsg)
+            sys.exit()
+        # 判断处理量
+        if (len(lists))>100000:
+            warnmsg = "[*] Loading %d targets, Maybe it's too much, continue? [y/N]" % (len(lists))
+            outputscreen.warning(warnmsg)
+            flag =input()
+            if flag in ('Y', 'y', 'yes', 'YES','Yes'):
+                pass
+            else:
+                msg = '[-] User quit!'
+                outputscreen.warning(msg)
+                sys.exit()
+        msg = '[+] Load targets from: %s' % args.target_input
         outputscreen.success(msg)
-        conf.target.put(args.target_single)
+        # save to conf
+        for target in lists:
+            conf.target.put(target)
         conf.target_nums = conf.target.qsize()
 
-    #多目标入队
+    # 文件读入入队
     elif args.target_file:
         if not os.path.isfile(args.target_file):
             msg = '[-] TargetFile not found: %s' % args.target_file
@@ -82,63 +103,13 @@ def TargetRegister(args):
         outputscreen.success(msg)
         with open(args.target_file, 'r', encoding='utf-8') as f:
             targets = f.readlines()
-            for target in targets:
+            targetslist=parseTarget(targets)
+            for target in targetslist:
                 conf.target.put(target.strip('\n'))
         conf.target_nums = conf.target.qsize()
 
-    #ip范围目标入队.e.g. 192.168.1.1-192.168.1.100
-    elif args.target_range:
-        try:
-            lists = genIP(args.target_range)
-            if (len(lists))>100000:
-                warnmsg = "[*] Loading %d targets, Maybe it's too much, continue? [y/N]" % (len(lists))
-                outputscreen.warning(warnmsg)
-                flag =input()
-                if flag in ('Y', 'y', 'yes', 'YES','Yes'):
-                    pass
-                else:
-                    msg = '[-] User quit!'
-                    outputscreen.warning(msg)
-                    sys.exit()
-            
-            msg = '[+] Load targets from: %s' % args.target_range
-            outputscreen.success(msg)
-
-            # save to conf
-            for target in lists:
-                conf.target.put(target)
-            conf.target_nums = conf.target.qsize()
-        except:
-            helpmsg = "Invalid input in [-iR], Example: -iR 192.168.1.1-192.168.1.100"
-            outputscreen.error(helpmsg)
-            sys.exit()
-    
-    # ip/mask e.g. 192.168.1.2/24
-    elif args.target_network: 
-        try:
-            # get 192.168.1.2 -->192.168.1.0
-            ip_format= args.target_network.split('/')
-            ip_str = IP(ip_format[0]).strBin()
-            ip_str = ip_str[0:int(ip_format[1])]+'0'*(32-int(ip_format[1])) 
-            ip = "%s.%s.%s.%s"%(str(int(ip_str[0:8],2)), str(int(ip_str[8:16],2)), str(int(ip_str[16:24],2)), str(int(ip_str[24:32],2)))
-            
-            ip_range = IP('%s/%s'%(ip,ip_format[1]))
-            
-            msg = '[+] Load targets from: %s' % args.target_network
-            outputscreen.success(msg)
-            
-            for i in ip_range:
-                conf.target.put(i)
-            conf.target_nums = conf.target.qsize()
-        except:
-            msg = "[-] Invalid input in [-iN], Example: -iN 192.168.1.0/24"
-            outputscreen.error(msg)
-            sys.exit()
-            
-
-        
     #验证目标数量
     if conf.target.qsize() == 0:
-        errormsg = msg = '[!] No targets found.Please load targets with [-iU|-iF|-iR|-iN]'
+        errormsg = msg = '[!] No targets found.Please load targets with [-i|-iF]'
         outputscreen.error(errormsg)
         sys.exit()
