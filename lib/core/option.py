@@ -103,9 +103,11 @@ def TargetRegister(args):
         outputscreen.success(msg)
         with open(args.target_file, 'r', encoding='utf-8') as f:
             targets = f.readlines()
-            targetslist=parseTarget(targets)
-            for target in targetslist:
-                conf.target.put(target.strip('\n'))
+            for target in targets:
+                target=target.strip('\n')
+                parsed_target=parseTarget(target)
+                for i in parsed_target:
+                    conf.target.put(target)
         conf.target_nums = conf.target.qsize()
 
     #验证目标数量
