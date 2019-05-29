@@ -31,6 +31,8 @@ class ConfigFileParser:
         return self._get_option('RecursiveScan','conf.recursive_status_code')
     def recursive_scan_max_url_length(self):
         return self._get_option('RecursiveScan','conf.recursive_scan_max_url_length')
+    def recursive_blacklist_exts(self):
+        return self._get_option('RecursiveScan','conf.recursive_blacklist_exts')
     def exclude_subdirs(self):
         return self._get_option('RecursiveScan','conf.exclude_subdirs')
 

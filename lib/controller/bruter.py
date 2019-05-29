@@ -84,6 +84,7 @@ def loadConf():
     conf.recursive_scan = eval(ConfigFileParser().recursive_scan())
     conf.recursive_scan_max_url_length = eval(ConfigFileParser().recursive_scan_max_url_length())
     conf.recursive_status_code = eval(ConfigFileParser().recursive_status_code())
+    conf.recursive_blacklist_exts = eval(ConfigFileParser().recursive_blacklist_exts())
     conf.exclude_subdirs = eval(ConfigFileParser().exclude_subdirs())
 
     conf.dict_mode = eval(ConfigFileParser().dict_mode())
@@ -139,6 +140,9 @@ def recursiveScan(response_url,all_payloads):
     @return:
     '''
     if not conf.recursive_scan:
+        return
+    # 当前url后缀在黑名单内，不进行递归
+    if response_url.split('.')[-1].lower() in conf.recursive_blacklist_exts:
         return
     #XXX:payloads字典要固定格式
     for payload in all_payloads:
