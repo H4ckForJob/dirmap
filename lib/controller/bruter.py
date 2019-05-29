@@ -145,10 +145,14 @@ def recursiveScan(response_url,all_payloads):
         #判断是否排除。若在排除的目录列表中，则排除。self.excludeSubdirs排除的列表，配置文件中，形如:/test、/test1
         if payload in [directory for directory in conf.exclude_subdirs]:
             return
-        #payload容错，添加正斜杠前缀
-        if not payload.startswith('/'):
-            payload = '/' + payload
-        #拼接payload，限制长度，并入队tasks
+        #payload拼接，处理/重复或缺失
+        if response_url.endswith('/') and payload.startswith('/'):
+            # /重复，url和payload都有/，删去payload的/前缀
+            payload = payload[1:]
+        elif (not response_url.endswith('/')) and (not payload.startswith('/')):
+            # /缺失，url和payload都不包含/，在payload前追加/
+            payload = '/'+payload
+        #拼接payload，限制url长度，入队tasks
         newpayload=response_url+payload
         if(len(newpayload) < int(conf.recursive_scan_max_url_length)):
             tasks.all_task.put(response_url + payload)
@@ -429,7 +433,7 @@ def responseHandler(response):
     @param {type}
     @return:
     '''
-    #3结果处理阶段
+    #结果处理阶段
     try:
         size = intToSize(int(response.headers['content-length']))
     except (KeyError, ValueError):
