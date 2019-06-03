@@ -1,10 +1,12 @@
 <!--
  * @Author: xxlin
  * @Date: 2019-04-11 20:34:14
- * @LastEditors: xxlin
- * @LastEditTime: 2019-05-14 16:06:42
+ * @LastEditors: ttttmr
+ * @LastEditTime: 2019-06-03 23:49:33
  -->
-# dirmap
+# Dirmap
+
+[English](./README_EN.md) [中文](./README.md)
 
 一个高级web目录扫描工具，功能将会强于DirBuster、Dirsearch、cansina、御剑
 
@@ -22,7 +24,7 @@
 - 自定义请求
 - 自定义响应结果处理...
 
-那么接下来看看dirmap的**特点**吧
+那么接下来看看Dirmap的**特点**吧
 
 # 功能特点
 
@@ -66,7 +68,7 @@ python3 dirmap.py -i https://target.com -lcf
 python3 dirmap.py -i 192.168.1.1 -lcf
 ```
 
-子网
+子网（CIDR格式）
 
 ```shell
 python3 dirmap.py -i 192.168.1.0/24 -lcf
@@ -109,6 +111,10 @@ python3 dirmap.py -iF targets.txt -lcf
 conf.recursive_scan = 0
 #遇到这些状态码，开启递归扫描。默认配置[301,403]
 conf.recursive_status_code = [301,403]
+#URL超过这个长度就退出扫描
+conf.recursive_scan_max_url_length = 60
+#这些后缀名不递归扫
+conf.recursive_blacklist_exts = ["html",'htm','shtml','png','jpg','webp','bmp','js','css','pdf','ini','mp3','mp4']
 #设置排除扫描的目录。默认配置空。其他配置：e.g:['/test1','/test2']
 #conf.exclude_subdirs = ['/test1','/test2']
 conf.exclude_subdirs = ""
@@ -236,11 +242,13 @@ conf.update = 0
 - [x] engine初始化
   - [x] 设置线程数
 - [x] target初始化
-  - [x] 单个url(-iU,inputUrl)
-  - [x] 多个url(-iL,inputLocalFile)
-  - [x] ip范围
-    - [x] Start-End(-iR)
-    - [x] IP/MASK(-iN)
+  - [x] 自动解析处理输入格式( -i,inputTarget)
+    - [x] IP
+    - [x] Domain
+    - [x] URL
+    - [x] IP/MASK
+    - [x] IP Start-End
+  - [x] 文件读入(-iF,inputLocalFile)
 - [ ] bruter初始化
   - [ ] 加载配置方式()
     - [ ] 读取命令行参数值
