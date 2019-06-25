@@ -3,9 +3,9 @@
 
 '''
 @Author: xxlin
-@LastEditors: xxlin
+@LastEditors: ttttmr
 @Date: 2019-05-01 12:07:54
-@LastEditTime: 2019-05-01 21:57:07
+@LastEditTime: 2019-06-26 00:25:14
 '''
 
 import hashlib
@@ -16,7 +16,7 @@ import urllib
 import requests
 
 from lib.core.common import outputscreen
-from lib.core.data import th
+from lib.core.data import th, conf
 
 USER_AGENT = "Mozilla/5.0 (Windows; U; MSIE 10.0; Windows NT 9.0; es-ES)"
 user_agent = {"user-agent": USER_AGENT}
@@ -49,7 +49,7 @@ class Inspector:
         outputscreen.success("[+] Checking with: {}".format(target))
 
         try:
-            page = requests.get(target, headers=user_agent, verify=False,timeout=5)
+            page = requests.get(target, headers=user_agent, verify=False,timeout=5, proxies=conf.proxy_server)
             content = page.content
             result = {
                     'target': urllib.parse.urlparse(target).netloc,
