@@ -22,3 +22,9 @@ WEB-INF/web.xml
 WS_FTP.LOG
 .bash_history
 .env
+Thumbs.db
+.gitignore
+.vs
+.vscode
+.vscode/settings.json
+.github
