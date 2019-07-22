@@ -2,11 +2,11 @@
  * @Author: ttttmr
  * @date: 2019-06-03 23:09:07
  * @LastEditors: ttttmr
- * @LastEditTime: 2019-06-03 23:54:41
+ * @LastEditTime: 2019-07-22 21:53:53
  -->
 # Dirmap
 
-[English](./README_EN.md) [中文](./README.md)
+[中文](./README.md)
 
 An advanced web directory scanning tool that will be more powerful than DirBuster, Dirsearch, cansina, and Yu Jian
 

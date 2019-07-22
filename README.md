@@ -6,7 +6,7 @@
  -->
 # Dirmap
 
-[English](./README_EN.md) [中文](./README.md)
+[English](./README_EN.md)
 
 一个高级web目录扫描工具，功能将会强于DirBuster、Dirsearch、cansina、御剑
 
