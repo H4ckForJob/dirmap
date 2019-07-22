@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: ttttmr
 @Date: 2019-04-10 13:27:58
-@LastEditTime: 2019-05-29 16:52:25
+@LastEditTime: 2019-07-22 21:46:31
 '''
 
 import sys
@@ -15,7 +15,7 @@ def cmdLineParser():
     """
     This function parses the command line parameters and arguments
     """
-    parser = argparse.ArgumentParser(usage="python3 dirmap.py -iU https://target.com -lcf")
+    parser = argparse.ArgumentParser(usage="python3 dirmap.py -i https://target.com -lcf")
 
     # engine
     engine = parser.add_argument_group("Engine", "Engine config")
