@@ -3,9 +3,9 @@
 
 '''
 @Author: xxlin
-@LastEditors: xxlin
+@LastEditors: ttttmr
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-05-23 14:49:27
+@LastEditTime: 2019-05-29 16:50:01
 '''
 
 import configparser
@@ -84,6 +84,7 @@ def loadConf():
     conf.recursive_scan = eval(ConfigFileParser().recursive_scan())
     conf.recursive_scan_max_url_length = eval(ConfigFileParser().recursive_scan_max_url_length())
     conf.recursive_status_code = eval(ConfigFileParser().recursive_status_code())
+    conf.recursive_blacklist_exts = eval(ConfigFileParser().recursive_blacklist_exts())
     conf.exclude_subdirs = eval(ConfigFileParser().exclude_subdirs())
 
     conf.dict_mode = eval(ConfigFileParser().dict_mode())
@@ -140,15 +141,22 @@ def recursiveScan(response_url,all_payloads):
     '''
     if not conf.recursive_scan:
         return
+    # 当前url后缀在黑名单内，不进行递归
+    if response_url.split('.')[-1].lower() in conf.recursive_blacklist_exts:
+        return
     #XXX:payloads字典要固定格式
     for payload in all_payloads:
         #判断是否排除。若在排除的目录列表中，则排除。self.excludeSubdirs排除的列表，配置文件中，形如:/test、/test1
         if payload in [directory for directory in conf.exclude_subdirs]:
             return
-        #payload容错，添加正斜杠前缀
-        if not payload.startswith('/'):
-            payload = '/' + payload
-        #拼接payload，限制长度，并入队tasks
+        #payload拼接，处理/重复或缺失
+        if response_url.endswith('/') and payload.startswith('/'):
+            # /重复，url和payload都有/，删去payload的/前缀
+            payload = payload[1:]
+        elif (not response_url.endswith('/')) and (not payload.startswith('/')):
+            # /缺失，url和payload都不包含/，在payload前追加/
+            payload = '/'+payload
+        #拼接payload，限制url长度，入队tasks
         newpayload=response_url+payload
         if(len(newpayload) < int(conf.recursive_scan_max_url_length)):
             tasks.all_task.put(response_url + payload)
@@ -429,7 +437,7 @@ def responseHandler(response):
     @param {type}
     @return:
     '''
-    #3结果处理阶段
+    #结果处理阶段
     try:
         size = intToSize(int(response.headers['content-length']))
     except (KeyError, ValueError):

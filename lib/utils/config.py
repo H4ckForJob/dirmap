@@ -3,9 +3,9 @@
 
 '''
 @Author: xxlin
-@LastEditors: xxlin
+@LastEditors: ttttmr
 @Date: 2019-04-11 09:49:16
-@LastEditTime: 2019-05-14 14:16:02
+@LastEditTime: 2019-05-29 16:49:43
 '''
 
 from configparser import ConfigParser
@@ -31,6 +31,8 @@ class ConfigFileParser:
         return self._get_option('RecursiveScan','conf.recursive_status_code')
     def recursive_scan_max_url_length(self):
         return self._get_option('RecursiveScan','conf.recursive_scan_max_url_length')
+    def recursive_blacklist_exts(self):
+        return self._get_option('RecursiveScan','conf.recursive_blacklist_exts')
     def exclude_subdirs(self):
         return self._get_option('RecursiveScan','conf.exclude_subdirs')
 
