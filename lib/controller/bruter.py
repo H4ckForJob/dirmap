@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: ttttmr
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-05-29 16:50:01
+@LastEditTime: 2019-09-02 13:02:13
 '''
 
 import configparser
@@ -380,7 +380,7 @@ def scanModeHandler():
                         headers[k] = v
                 except Exception as e:
                     outputscreen.error("[x] Check personalized headers format: header=value,header=value.\n[x] error:{}".format(e))
-                    sys.exit()
+                    # sys.exit()
             #自定义ua
             if conf.request_header_ua:
                 headers['User-Agent'] = conf.request_header_ua
@@ -389,42 +389,42 @@ def scanModeHandler():
                 headers['Cookie'] = conf.request_header_cookie
             try:
                 response = requests.get(conf.url, headers=headers, timeout=conf.request_timeout, verify=False, allow_redirects=conf.redirection_302, proxies=conf.proxy_server)
+                #获取页面url
+                if response.status_code in conf.response_status_code:
+                    try:
+                        contentDecode = response.content.decode('utf-8')
+                    except UnicodeDecodeError:
+                        try:
+                            contentDecode = response.content.decode('gbk')
+                        except:
+                            outputscreen.error("[x] Unrecognized page coding errors")
+                    html = etree.HTML(contentDecode)
+                    #加载自定义xpath用于解析html
+                    urls = html.xpath(conf.crawl_mode_parse_html)
+                    for url in urls:
+                        #去除相似url
+                        if urlSimilarCheck(url):
+                            #判断:1.是否同域名 2.netloc是否为空(值空时为同域)。若满足1或2，则添加到temp payload
+                            if (urllib.parse.urlparse(url).netloc == urllib.parse.urlparse(conf.url).netloc) or urllib.parse.urlparse(url).netloc == '':
+                                payloads.crawl_mode_dynamic_fuzz_temp_dict.add(url)
+                payloads.crawl_mode_dynamic_fuzz_temp_dict = payloads.crawl_mode_dynamic_fuzz_temp_dict - {'#', ''}
+                if conf.crawl_mode_dynamic_fuzz:
+                    #加载动态fuzz后缀，TODO:独立动态生成字典模块
+                    loadSuffix(os.path.join(paths.DATA_PATH,conf.crawl_mode_dynamic_fuzz_suffix))
+                    #生成新爬虫动态字典
+                    for i in payloads.crawl_mode_dynamic_fuzz_temp_dict:
+                        payloads.crawl_mode_dynamic_fuzz_dict.extend(generateCrawlDict(i))
+                    for i in payloads.crawl_mode_dynamic_fuzz_temp_dict:
+                        payloads.crawl_mode_dynamic_fuzz_dict.append(urllib.parse.urlparse(i).path)
+                    payloadlists.extend(set(payloads.crawl_mode_dynamic_fuzz_dict))
+                else:
+                    for i in payloads.crawl_mode_dynamic_fuzz_temp_dict:
+                        payloads.crawl_mode_dynamic_fuzz_dict.append(urllib.parse.urlparse(i).path)
+                    payloadlists.extend(set(payloads.crawl_mode_dynamic_fuzz_dict))
             except requests.exceptions.ConnectionError as e:
                 outputscreen.error("[x] Crawler network connection error!plz check whether the target is accessible")
-                sys.exit()
+                # sys.exit()
 
-            #获取页面url
-            if response.status_code in conf.response_status_code:
-                try:
-                    contentDecode = response.content.decode('utf-8')
-                except UnicodeDecodeError:
-                    try:
-                        contentDecode = response.content.decode('gbk')
-                    except:
-                        outputscreen.error("[x] Unrecognized page coding errors")
-                html = etree.HTML(contentDecode)
-                #加载自定义xpath用于解析html
-                urls = html.xpath(conf.crawl_mode_parse_html)
-                for url in urls:
-                    #去除相似url
-                    if urlSimilarCheck(url):
-                        #判断:1.是否同域名 2.netloc是否为空(值空时为同域)。若满足1或2，则添加到temp payload
-                        if (urllib.parse.urlparse(url).netloc == urllib.parse.urlparse(conf.url).netloc) or urllib.parse.urlparse(url).netloc == '':
-                            payloads.crawl_mode_dynamic_fuzz_temp_dict.add(url)
-            payloads.crawl_mode_dynamic_fuzz_temp_dict = payloads.crawl_mode_dynamic_fuzz_temp_dict - {'#', ''}
-            if conf.crawl_mode_dynamic_fuzz:
-                #加载动态fuzz后缀，TODO:独立动态生成字典模块
-                loadSuffix(os.path.join(paths.DATA_PATH,conf.crawl_mode_dynamic_fuzz_suffix))
-                #生成新爬虫动态字典
-                for i in payloads.crawl_mode_dynamic_fuzz_temp_dict:
-                    payloads.crawl_mode_dynamic_fuzz_dict.extend(generateCrawlDict(i))
-                for i in payloads.crawl_mode_dynamic_fuzz_temp_dict:
-                    payloads.crawl_mode_dynamic_fuzz_dict.append(urllib.parse.urlparse(i).path)
-                payloadlists.extend(set(payloads.crawl_mode_dynamic_fuzz_dict))
-            else:
-                for i in payloads.crawl_mode_dynamic_fuzz_temp_dict:
-                    payloads.crawl_mode_dynamic_fuzz_dict.append(urllib.parse.urlparse(i).path)
-                payloadlists.extend(set(payloads.crawl_mode_dynamic_fuzz_dict))
     if payloadlists:
         return payloadlists
     else:
