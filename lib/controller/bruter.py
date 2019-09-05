@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: ttttmr
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-09-02 13:02:13
+@LastEditTime: 2019-09-05 10:33:36
 '''
 
 import configparser
@@ -455,7 +455,7 @@ def responseHandler(response):
     if response.status_code in conf.response_status_code:
         msg = '[{}]'.format(str(response.status_code))
         if conf.response_header_content_type:
-            msg += '[{}]'.format(response.headers['content-type'])
+            msg += '[{}]'.format(response.headers.get('content-type'))
         if conf.response_size:
             msg += '[{}] '.format(str(size))
         msg += response.url
@@ -513,7 +513,7 @@ def worker():
         #outputscreen.error('[x] timeout! url:{}'.format(payloads.current_payload))
         pass
     except Exception as e:
-        #outputscreen.error('[x] error:{}'.format(e))
+        outputscreen.error('[x] error:{}'.format(e))
         pass
     finally:
         #更新进度条
