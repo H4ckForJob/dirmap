@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: ttttmr
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-09-05 10:33:36
+@LastEditTime: 2019-09-08 12:34:26
 '''
 
 import configparser
@@ -390,15 +390,8 @@ def scanModeHandler():
             try:
                 response = requests.get(conf.url, headers=headers, timeout=conf.request_timeout, verify=False, allow_redirects=conf.redirection_302, proxies=conf.proxy_server)
                 #获取页面url
-                if response.status_code in conf.response_status_code:
-                    try:
-                        contentDecode = response.content.decode('utf-8')
-                    except UnicodeDecodeError:
-                        try:
-                            contentDecode = response.content.decode('gbk')
-                        except:
-                            outputscreen.error("[x] Unrecognized page coding errors")
-                    html = etree.HTML(contentDecode)
+                if (response.status_code in conf.response_status_code) and response.text:
+                    html = etree.HTML(response.text)
                     #加载自定义xpath用于解析html
                     urls = html.xpath(conf.crawl_mode_parse_html)
                     for url in urls:
@@ -469,9 +462,10 @@ def responseHandler(response):
             recursiveScan(response.url,payloads.all_payloads)
 
     #自定义正则匹配响应
-    pattern = re.compile(conf.custom_response_page)
-    if pattern.search(response.content.decode('utf-8')):
-        outputscreen.info('[!] Custom response information matched\n[!] use regular expression:{}\n[!] matched page:{}'.format(conf.custom_response_page,response.text))
+    if conf.custom_response_page:
+        pattern = re.compile(conf.custom_response_page)
+        if pattern.search(response.text):
+            outputscreen.info('[!] Custom response information matched\n[!] use regular expression:{}\n[!] matched page:{}'.format(conf.custom_response_page,response.text))
 
 def worker():
     '''
@@ -513,7 +507,7 @@ def worker():
         #outputscreen.error('[x] timeout! url:{}'.format(payloads.current_payload))
         pass
     except Exception as e:
-        outputscreen.error('[x] error:{}'.format(e))
+        # outputscreen.error('[x] error:{}'.format(e))
         pass
     finally:
         #更新进度条
