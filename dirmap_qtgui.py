@@ -12,9 +12,7 @@ from lib.controller.engine import run
 from lib.core.common import setPaths
 from lib.core.data import cmdLineOptions, conf, paths, tasks
 from lib.core.option import initOptions
-# from QCandyUi.CandyWindow import colorful
 from QCandyUi import CandyWindow
-# from lib.parse.cmdline import cmdLineParser
 
 class WorkThread(QThread):
     stop = pyqtSignal()
@@ -28,7 +26,6 @@ class WorkThread(QThread):
         run()
         self.stop.emit()  # 循环完毕后发出信号
 
-# @colorful('blueGreen')
 class DirmapGUI(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -42,7 +39,6 @@ class DirmapGUI(QMainWindow):
         self.setWindowIcon(QIcon('dirmap.ico'))
 
         grid = QGridLayout()
-        # grid.setSpacing(10)
         urlLable = QLabel('URL')
         urlLable.setAlignment((Qt.AlignRight | Qt.AlignVCenter))
         self.urlText = QLineEdit()
@@ -73,9 +69,6 @@ class DirmapGUI(QMainWindow):
         wid_get.setLayout(grid)
         self.setCentralWidget(wid_get)
 
-        # self.setLayout(grid)
-        # self.show()
-
     # 控制窗口显示在屏幕中心的方法
     def center(self):
         # 获得窗口
@@ -95,15 +88,12 @@ class DirmapGUI(QMainWindow):
         row_index = self.tableWidget.rowCount()
         for i in range(row_index):
             self.tableWidget.removeRow(0)
-
         paths.ROOT_PATH = os.getcwd()
         setPaths()
         dicts = {'thread_num': 8, 'target_input': text, 'target_file': '', 'load_config_file': True,
                  'debug': False}
         cmdLineOptions.update(dicts)
         initOptions(cmdLineOptions)
-        # run()
-        # self.stop_button_clicked()
         self.workThread = WorkThread()
         conf["thread"] = self.workThread
         self.workThread.start()
@@ -119,7 +109,6 @@ class DirmapGUI(QMainWindow):
             tasks.all_task.get(block=True, timeout=3)
 
     def update_table(self, url, types, size, code):
-        print(url, types, size, code)
         row_index = self.tableWidget.rowCount()
         self.tableWidget.setRowCount(row_index + 1)
         url_item = QLabel()
