@@ -10,7 +10,7 @@
 
 一个高级web目录扫描工具，功能将会强于DirBuster、Dirsearch、cansina、御剑
 
-![dirmap](doc/dirmap.png)
+![dirmap](dirmap.png)
 
 # 需求分析
 
