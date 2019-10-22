@@ -2,3 +2,5 @@ gevent
 requests
 progressbar2
 lxml
+QCandyUi
+PyQt5
