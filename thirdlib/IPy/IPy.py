@@ -1017,10 +1017,10 @@ class IP(IPint):
         raise ValueError("%s cannot be converted to an IPv4 address."
                          % repr(self))
 
-class IPSet(collections.MutableSet):
+class IPSet(collections.abc.MutableSet):
     def __init__(self, iterable=[]):
         # Make sure it's iterable, otherwise wrap
-        if not isinstance(iterable, collections.Iterable):
+        if not isinstance(iterable, collections.abc.Iterable):
             raise TypeError("'%s' object is not iterable" % type(iterable).__name__)
         
         # Make sure we only accept IP objects
