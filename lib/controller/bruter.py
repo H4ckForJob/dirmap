@@ -453,6 +453,7 @@ def responseHandler(response):
             msg += '[{}] '.format(str(size))
         msg += response.url
         outputscreen.info('\r'+msg+' '*(th.console_width-len(msg)+1))
+        conf['thread'].update.emit(response.url,response.headers.get('content-type'),str(size),str(response.status_code))
         #已去重复，结果保存。NOTE:此处使用response.url进行文件名构造，解决使用-iL参数时，不能按照域名来命名文件名的问题
         #使用replace()，替换`:`，修复window下不能创建有`:`的文件问题
         saveResults(urllib.parse.urlparse(response.url).netloc.replace(':','_'),msg)
@@ -513,6 +514,7 @@ def worker():
         #更新进度条
         tasks.task_count += 1
         bar.log.update(tasks.task_count)
+        conf['thread'].update_status.emit()
 
 def boss():
     '''
@@ -520,7 +522,7 @@ def boss():
     @param {type}
     @return:
     '''
-    while not tasks.all_task.empty():
+    while not tasks.all_task.empty() and not conf.is_stop:
         worker()
 
 def bruter(url):
