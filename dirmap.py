@@ -26,7 +26,10 @@ def main():
     """
     main fuction of dirmap 
     """
-
+    # Make sure the version of python you are using is high enough
+    if sys.version_info < (3, 8):
+        sys.stdout.write("Sorry, dirmap requires Python 3.8 or higher\n")
+        sys.exit(1)
     # anyway output thr banner information
     banner() 
 
