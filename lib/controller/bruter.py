@@ -3,9 +3,9 @@
 
 '''
 @Author: xxlin
-@LastEditors: ttttmr
+@LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-09-08 12:34:26
+@LastEditTime: 2023-07-20 20:44:16
 '''
 
 import configparser
@@ -452,7 +452,14 @@ def responseHandler(response):
         if conf.response_size:
             msg += '[{}] '.format(str(size))
         msg += response.url
-        outputscreen.info('\r'+msg+' '*(th.console_width-len(msg)+1))
+        if response.status_code in [200]:
+            outputscreen.success('\r'+msg+' '*(th.console_width-len(msg)+1))
+        elif response.status_code in [301,302]:
+            outputscreen.warning('\r'+msg+' '*(th.console_width-len(msg)+1))
+        elif response.status_code in [403,404]:
+            outputscreen.error('\r'+msg+' '*(th.console_width-len(msg)+1))
+        else:
+            outputscreen.info('\r'+msg+' '*(th.console_width-len(msg)+1))
         #已去重复，结果保存。NOTE:此处使用response.url进行文件名构造，解决使用-iL参数时，不能按照域名来命名文件名的问题
         #使用replace()，替换`:`，修复window下不能创建有`:`的文件问题
         saveResults(urllib.parse.urlparse(response.url).netloc.replace(':','_'),msg)
