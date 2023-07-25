@@ -257,6 +257,9 @@ def generateBlastDict():
     @param {type}
     @return:
     '''
+    if conf.blast_mode_min > conf.blast_mode_max:
+        outputscreen.error("[x] The minimum length should be less than or equal to the maximum length")
+        sys.exit(1)
     the_min = conf.blast_mode_min
     if conf.blast_mode_resume_charset != '':
         the_min = len(conf.blast_mode_resume_charset)
