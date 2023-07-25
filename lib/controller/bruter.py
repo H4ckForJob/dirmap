@@ -420,7 +420,7 @@ def scanModeHandler():
                         payloads.crawl_mode_dynamic_fuzz_dict.append(urllib.parse.urlparse(i).path)
                     payloadlists.extend(set(payloads.crawl_mode_dynamic_fuzz_dict))
             except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, requests.exceptions.ReadTimeout) as e:
-                outputscreen.error("[x] Crawler network connection error!plz check whether the target is accessible")
+                outputscreen.error("[x] Crawler network connection error!plz check whether the target is accessible, error info:{}".format(e))
                 # sys.exit()
 
     if payloadlists:
