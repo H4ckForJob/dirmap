@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2023-07-20 20:44:16
+@LastEditTime: 2023-07-25 16:32:33
 '''
 
 import configparser
@@ -316,7 +316,9 @@ def generateSingleFuzzDict(path):
         for i in loadSingleDict(path):
             payloads.fuzz_mode_dict.append(fuzz_path.replace(conf.fuzz_mode_label,i))
         return payloads.fuzz_mode_dict
-
+    else:
+        outputscreen.error("[x] Please set the fuzz label")
+        sys.exit(1)
 def generateMultFuzzDict(path):
     '''
     @description: 多字典。生成fuzz字典
@@ -329,6 +331,9 @@ def generateMultFuzzDict(path):
         for i in loadMultDict(path):
             payloads.fuzz_mode_dict.append(fuzz_path.replace(conf.fuzz_mode_label,i))
         return payloads.fuzz_mode_dict
+    else:
+        outputscreen.error("[x] Please set the fuzz label")
+        sys.exit(1)
 
 def scanModeHandler():
     '''
