@@ -31,7 +31,7 @@ def cmdLineParser():
 
     # bruter
     bruter = parser.add_argument_group("Bruter", "Bruter config")
-    bruter.add_argument("-lcf", "--loadConfigFile",  dest="load_config_file", default=False, action="store_true",
+    bruter.add_argument("-lcf", "--loadConfigFile",  dest="load_config_file", default=True, action="store_true",
                         help="Load the configuration through the configuration file")
     bruter.add_argument("--debug", dest="debug",default=False, action="store_true",
                         help="Print payloads and exit")
