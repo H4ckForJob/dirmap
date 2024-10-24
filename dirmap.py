@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-04-10 13:27:59
-@LastEditTime: 2019-05-01 17:57:11
+@LastEditTime: 2023-07-25 15:56:04
 '''
 
 import os
@@ -26,7 +26,10 @@ def main():
     """
     main fuction of dirmap 
     """
-
+    # Make sure the version of python you are using is high enough
+    if sys.version_info < (3, 8):
+        outputscreen.error("Sorry, dirmap requires Python 3.8 or higher\n")
+        sys.exit(1)
     # anyway output thr banner information
     banner() 
 
@@ -42,7 +45,11 @@ def main():
     initOptions(cmdLineOptions) 
 
     # run!
-    run()
+    try:
+        run()
+    except KeyboardInterrupt:
+        outputscreen.success("[+] exit")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

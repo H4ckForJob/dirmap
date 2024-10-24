@@ -3,9 +3,9 @@
 
 '''
 @Author: xxlin
-@LastEditors: ttttmr
+@LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2019-09-08 12:34:26
+@LastEditTime: 2023-07-25 16:32:33
 '''
 
 import configparser
@@ -257,6 +257,9 @@ def generateBlastDict():
     @param {type}
     @return:
     '''
+    if conf.blast_mode_min > conf.blast_mode_max:
+        outputscreen.error("[x] The minimum length should be less than or equal to the maximum length")
+        sys.exit(1)
     the_min = conf.blast_mode_min
     if conf.blast_mode_resume_charset != '':
         the_min = len(conf.blast_mode_resume_charset)
@@ -316,7 +319,9 @@ def generateSingleFuzzDict(path):
         for i in loadSingleDict(path):
             payloads.fuzz_mode_dict.append(fuzz_path.replace(conf.fuzz_mode_label,i))
         return payloads.fuzz_mode_dict
-
+    else:
+        outputscreen.error("[x] Please set the fuzz label")
+        sys.exit(1)
 def generateMultFuzzDict(path):
     '''
     @description: 多字典。生成fuzz字典
@@ -329,6 +334,9 @@ def generateMultFuzzDict(path):
         for i in loadMultDict(path):
             payloads.fuzz_mode_dict.append(fuzz_path.replace(conf.fuzz_mode_label,i))
         return payloads.fuzz_mode_dict
+    else:
+        outputscreen.error("[x] Please set the fuzz label")
+        sys.exit(1)
 
 def scanModeHandler():
     '''
@@ -415,7 +423,7 @@ def scanModeHandler():
                         payloads.crawl_mode_dynamic_fuzz_dict.append(urllib.parse.urlparse(i).path)
                     payloadlists.extend(set(payloads.crawl_mode_dynamic_fuzz_dict))
             except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, requests.exceptions.ReadTimeout) as e:
-                outputscreen.error("[x] Crawler network connection error!plz check whether the target is accessible")
+                outputscreen.error("[x] Crawler network connection error!plz check whether the target is accessible, error info:{}".format(e))
                 # sys.exit()
 
     if payloadlists:
@@ -452,7 +460,14 @@ def responseHandler(response):
         if conf.response_size:
             msg += '[{}] '.format(str(size))
         msg += response.url
-        outputscreen.info('\r'+msg+' '*(th.console_width-len(msg)+1))
+        if response.status_code in [200]:
+            outputscreen.success('\r'+msg+' '*(th.console_width-len(msg)+1))
+        elif response.status_code in [301,302]:
+            outputscreen.warning('\r'+msg+' '*(th.console_width-len(msg)+1))
+        elif response.status_code in [403,404]:
+            outputscreen.error('\r'+msg+' '*(th.console_width-len(msg)+1))
+        else:
+            outputscreen.info('\r'+msg+' '*(th.console_width-len(msg)+1))
         #已去重复，结果保存。NOTE:此处使用response.url进行文件名构造，解决使用-iL参数时，不能按照域名来命名文件名的问题
         #使用replace()，替换`:`，修复window下不能创建有`:`的文件问题
         saveResults(urllib.parse.urlparse(response.url).netloc.replace(':','_'),msg)
