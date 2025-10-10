@@ -54,6 +54,26 @@
 git clone https://github.com/H4ckForJob/dirmap.git && cd dirmap && python3 -m pip install -r requirement.txt
 ```
 
+### 在kali下使用开发版dirmap
+
+1. 创建虚拟环境。
+```
+python3 -m venv ~/dirmapDev
+```
+2. 激活虚拟环境。
+```
+source ~/dirmapDev/bin/activate
+```
+3. 查看分支/切换到dev分支。
+```
+git branch -r
+git switch dev
+```
+4. 安装依赖。
+```
+python3 -m pip install -r requirement.txt
+```
+
 ## 快速使用
 
 ### 输入目标
