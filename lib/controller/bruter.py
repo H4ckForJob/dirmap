@@ -5,7 +5,7 @@
 @Author: xxlin
 @LastEditors: xxlin
 @Date: 2019-03-14 09:49:05
-@LastEditTime: 2023-07-25 16:32:33
+@LastEditTime: 2025-10-22 05:33:45
 '''
 
 import configparser
@@ -127,6 +127,7 @@ def loadConf():
     conf.custom_503_page = eval(ConfigFileParser().custom_503_page())
     conf.custom_response_page = eval(ConfigFileParser().custom_response_page())
     conf.skip_size = eval(ConfigFileParser().skip_size())
+    conf.filter_regexp_list = eval(ConfigFileParser().filter_regexp_list())
 
     conf.proxy_server = eval(ConfigFileParser().proxy_server())
 
@@ -446,7 +447,18 @@ def responseHandler(response):
     #跳过大小为skip_size的页面
     if size == conf.skip_size:
         return
-
+    #根据正则过滤响应。将匹配上正则的响应全部丢弃
+    if conf.filter_regexp_list:
+        #outputscreen.info("[!]当前正则列表为：{}".format(conf.filter_regexp_list))
+        #outputscreen.info("[!]当前url为：{}".format(response.url))
+        #outputscreen.info("[!]当前响应报文为：{}".format(response.text))
+        for each_regexp in conf.filter_regexp_list:
+            #outputscreen.info("[!]当前正则为：{}".format(each_regexp))
+            pattern = re.compile(each_regexp)
+            if pattern.search(response.text):
+                #outputscreen.info("[!]匹配到正则关键字：{}".format(each_regexp))
+                #outputscreen.info("[!]匹配到正则的url：{}".format(response.url))
+                return
     #自动识别404-判断是否与获取404页面特征匹配
     if conf.auto_check_404_page:
         if hashlib.md5(response.content).hexdigest() in conf.autodiscriminator_md5:

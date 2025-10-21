@@ -3,9 +3,9 @@
 
 '''
 @Author: xxlin
-@LastEditors: ttttmr
+LastEditors: H4ckForJob xxlin.ujs@qq.com
 @Date: 2019-04-11 09:49:16
-@LastEditTime: 2019-05-29 16:49:43
+LastEditTime: 2025-10-22 06:18:02
 '''
 
 from configparser import ConfigParser
@@ -114,6 +114,8 @@ class ConfigFileParser:
         return self._get_option('ResponseHandler','conf.custom_response_page')
     def skip_size(self):
         return self._get_option('ResponseHandler','conf.skip_size')
+    def filter_regexp_list(self):
+        return self._get_option('ResponseHandler','conf.filter_regexp_list')
 
     def proxy_server(self):
         return self._get_option('ProxyHandler','conf.proxy_server')
