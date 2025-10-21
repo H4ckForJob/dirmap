@@ -1,8 +1,8 @@
 <!--
  * @Author: xxlin
  * @Date: 2019-04-11 20:34:14
- * @LastEditors: ttttmr
- * @LastEditTime: 2019-06-03 23:49:33
+ * @LastEditors: H4ckForJob xxlin.ujs@qq.com
+ * @LastEditTime: 2025-10-22 06:25:09
  -->
 # Dirmap
 
@@ -238,6 +238,8 @@ conf.custom_response_page = ""
 #跳过显示页面大小为x的页面，若不设置，请配置成"None"，默认配置“None”。其他大小配置参考e.g:None;0b;1k;1m
 #conf.skip_size = "0b"
 conf.skip_size = "None"
+#正则过滤列表。如果页面内容匹配正则表达式，则跳过该页面。默认配置空。其他配置参考e.g:["test1","test2"]
+conf.filter_regexp_list = []
 
 #代理选项
 [ProxyHandler]
