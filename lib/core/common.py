@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
-@Author: xxlin
-@LastEditors: ttttmr
-@Date: 2019-04-10 13:27:58
-@LastEditTime: 2019-05-29 16:49:22
-'''
 
 import os.path
 import sys
@@ -16,13 +10,12 @@ import re
 
 from lib.core.data import cmdLineOptions, conf, paths, payloads
 from lib.core.enums import COLOR
-from lib.core.setting import BANNER
 from thirdlib.colorama import Back, Fore, Style, init
 
 init(autoreset=True)
 class Outputscreen:
     """
-    显示颜色类
+    Display color class
     """
     def info(self, s):
         print(Style.BRIGHT+Fore.WHITE + str(s) + Fore.RESET+Style.RESET_ALL)
@@ -40,14 +33,14 @@ class Outputscreen:
     def blue(self, s):
         print(Style.BRIGHT+Fore.BLUE + str(s) + Fore.RESET+Style.RESET_ALL)
 
-#创建outputscreen对象，用于输出各种颜色的信息
+# Create outputscreen object for outputting various colored information
 outputscreen=Outputscreen()
 
 def setPaths():
     """
-    设置全局绝对路径
+    Set global absolute paths
     """
-    # 根目录
+    # Root directory
     root_path = paths.ROOT_PATH
     # datapath
     paths.DATA_PATH = os.path.join(root_path, "data")
@@ -72,15 +65,8 @@ def setPaths():
     #print(root_path,paths.DATA_PATH,paths.SCRIPT_PATH,paths.OUTPUT_PATH,paths.CONFIG_PATH)
     #print(paths.WEAK_PASS,paths.LARGE_WEAK_PASS,paths.UA_LIST_PATH)
 
-def banner():
-    '''
-    @description: 打印banner
-    @param {type}
-    @return:
-    '''
-    outputscreen.blue(BANNER)
 
-# 将'192.168.1.1-192.168.1.100'分解成ip地址列表
+# Decompose '192.168.1.1-192.168.1.100' into IP address list
 def genIP(ip_range):
     '''
     print (genIP('192.18.1.1-192.168.1.3'))
@@ -97,45 +83,45 @@ def genIP(ip_range):
     start ,end = [ip2num(x) for x in ip_range.split('-')]
     return [num2ip(num) for num in range(start,end+1) if num & 0xff]
 
-# 识别目标，转换成列表形式
+# Identify targets, convert to list form
 def parseTarget(target):
-    lists=[]
-    ipv4withmask_re=re.compile("^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])/(3[0-2]|[1-2]?[0-9])$")
-    ipv4range_re=re.compile("^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])-(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$")
+    targets=[]
+    ipv4withmask_re = re.compile(r"^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])/(3[0-2]|[1-2]?[0-9])$")
+    ipv4range_re   = re.compile(r"^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])-(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$")
     try:
-        # 尝试解析url
+        # Try to parse url
         parsed_url=urllib.parse.urlparse(target)
-        # 判断不带http
+        # Check if not http
         if parsed_url.scheme != 'http':
-            # 判断IP/Mask格式
+            # Check IP/Mask format
             if ipv4withmask_re.search(parsed_url.path):
-                # 是子网还是网址 e.g. 192.168.1.1/24 or http://192.168.1.1/24
+                # Is it subnet or website e.g. 192.168.1.1/24 or http://192.168.1.1/24
                 infomsg = "[*] %s is IP/Mask[Y] or URL(http://)[n]? [Y/n]" %target
                 outputscreen.info(infomsg)
                 flag =input()
                 if flag in ('N', 'n', 'no', 'No', 'NO'):
-                    # 按链接处理 e.g. http://192.168.1.1/24
-                    lists.append(target)
+                    # Process as link e.g. http://192.168.1.1/24
+                    targets.append(target)
                 else:
-                    # 按子网处理 e.g. 192.168.1.1/24
-                    lists=list(ipaddress.ip_interface(target).network)
-            # 判断网络范围格式 e.g. 192.168.1.1-192.168.1.100
+                    # Process as subnet e.g. 192.168.1.1/24
+                    targets=list(ipaddress.ip_interface(target).network)
+            # Check network range format e.g. 192.168.1.1-192.168.1.100
             elif ipv4range_re.search(target):
-                lists=genIP(target)
-            # 按照链接处理
+                targets=genIP(target)
+            # Process as link
             else:
-                lists.append(target)
-        # 为http://格式
+                targets.append(target)
+        # For http:// format
         else:
-            lists.append(target)
+            targets.append(target)
     except:
-        # 识别失败
+        # Identification failed
         pass
-    return lists
+    return targets
 
 def intToSize(bytes):
     '''
-    @description: bits大小转换，对人类友好
+    @description: bits size conversion, human friendly
     @param {type}
     @return:
     '''
@@ -149,9 +135,9 @@ def intToSize(bytes):
 
 def urlSimilarCheck(url):
     '''
-    @description: url相似度分析，当url路径和参数键值类似时，则判为重复，参考某人爬虫
+    @description: url similarity analysis, when url path and parameter key values are similar, it is judged as duplicate, referencing someone's crawler
     @param {type}
-    @return: 非重复返回True
+    @return: Return True if not duplicate
     '''
     url_struct = urllib.parse.urlparse(url)
     query_key = '|'.join(sorted([i.split('=')[0] for i in url_struct.query.split('&')]))

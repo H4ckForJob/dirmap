@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
-@Author: xxlin
-@LastEditors: xxlin
-@Date: 2019-04-10 13:27:58
-@LastEditTime: 2019-04-11 15:57:17
-'''
 
 """
 getTerminalSize()
@@ -95,8 +89,10 @@ def _getTerminalSize_linux():
             pass
     if not cr:
         try:
-            cr = (env.get('LINES'), env.get('COLUMNS'))
+            cr = (os.environ.get('LINES'), os.environ.get('COLUMNS'))
         except Exception:
             return None
+    if cr[0] is None or cr[1] is None:
+        return None
     return int(cr[1]), int(cr[0])
 

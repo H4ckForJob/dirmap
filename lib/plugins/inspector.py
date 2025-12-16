@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
-@Author: xxlin
-@LastEditors: ttttmr
-@Date: 2019-05-01 12:07:54
-@LastEditTime: 2019-06-26 00:25:14
-'''
 
 import hashlib
 import random
@@ -44,7 +38,8 @@ class Inspector:
             random.seed()
             s.append(chr(random.randrange(97, 122)))
         s = "".join(s)
-        target = self.target + s
+        # Use urljoin to correctly handle URL concatenation, avoiding double slash issue
+        target = urllib.parse.urljoin(self.target, s)
 
         outputscreen.success("[+] Checking with: {}".format(target))
 

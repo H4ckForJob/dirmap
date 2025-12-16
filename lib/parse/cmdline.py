@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
-@Author: xxlin
-@LastEditors: ttttmr
-@Date: 2019-04-10 13:27:58
-@LastEditTime: 2019-07-22 21:46:31
-'''
 
 import sys
 import argparse

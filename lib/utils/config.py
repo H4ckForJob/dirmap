@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
-@Author: xxlin
-@LastEditors: ttttmr
-@Date: 2019-04-11 09:49:16
-@LastEditTime: 2019-05-29 16:49:43
-'''
 
 from configparser import ConfigParser
 from lib.core.data import paths
@@ -20,8 +14,8 @@ class ConfigFileParser:
             cf = ConfigParser()
             cf.read(paths.CONFIG_PATH)
             return cf.get(section=section, option=option)
-        except:
-            outputscreen.warning('Missing essential options, please check your config-file.')
+        except Exception as e:
+            outputscreen.warning(f'Missing essential options, please check your config-file: {e}')
             return ''
 
 

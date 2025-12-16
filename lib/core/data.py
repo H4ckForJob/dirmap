@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
-@Author: xxlin
-@LastEditors: xxlin
-@Date: 2019-04-10 13:27:58
-@LastEditTime: 2019-04-10 17:46:40
-'''
 
 from lib.core.datatype import AttribDict
 
@@ -23,11 +17,11 @@ conf = AttribDict()
 # object to control engine 
 th = AttribDict()
 
-#创建payloads字典对象存储payloads
+# Create payloads dictionary object to store payloads
 payloads = AttribDict()
 
-#创建tasks字典对象存储tasks
+# Create tasks dictionary object to store tasks
 tasks = AttribDict()
 
-#创建进度条对象存储进度
+# Create progress bar object to store progress
 bar = AttribDict()

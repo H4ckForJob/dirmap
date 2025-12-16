@@ -1,12 +1,6 @@
-<!--
- * @Author: ttttmr
- * @date: 2019-06-03 23:09:07
- * @LastEditors: ttttmr
- * @LastEditTime: 2019-07-22 21:53:53
- -->
 # Dirmap
 
-[中文](./README.md)
+[Chinese](./README.md)
 
 An advanced web directory scanning tool that will be more powerful than DirBuster, Dirsearch, cansina, and Yu Jian
 
@@ -51,7 +45,7 @@ Then take a look at the **features** of Dirmap.
 ## Environment and download
 
 ```shell
-git clone https://github.com/H4ckForJob/dirmap.git && cd dirmap && python3 -m pip install -r requirement.txt
+git clone <repository-url> && cd dirmap && python3 -m pip install -r requirement.txt
 ```
 
 ## Quick use
@@ -234,6 +228,5 @@ In the process of writing dirmap, I borrowed a lot of models and ideas from exce
 
 # Contact
 
-mail: xxlin.ujs@qq.com
 
 ![donate](doc/donate.jpg)

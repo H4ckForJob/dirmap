@@ -1,4 +1,4 @@
-gevent==20.12.1
-requests==2.31.0
-progressbar2==3.53.1
-lxml==4.5.0
+gevent
+requests
+progressbar2
+lxml

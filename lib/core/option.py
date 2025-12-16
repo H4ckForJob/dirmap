@@ -1,24 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
-@Author: xxlin
-@LastEditors: ttttmr
-@Date: 2019-04-10 13:27:58
-@LastEditTime: 2019-05-29 16:52:42
-'''
 
-import imp
 import os
-import queue
 import sys
-import time
-import ipaddress
 
+from gevent.queue import Queue
 from lib.controller.bruter import loadConf
 from lib.core.common import parseTarget, outputscreen
-from lib.core.data import conf, paths
-from thirdlib.IPy.IPy import IP
+from lib.core.data import conf
+
 
 def initOptions(args):
     EngineRegister(args)
@@ -27,91 +18,89 @@ def initOptions(args):
 
 
 def EngineRegister(args):
-    """
-    加载并发引擎模块
-    """
-    conf.engine_mode = 'coroutine'
+    conf.engine_mode = "coroutine"
 
-    #设置线程数
-    if args.thread_num > 200 or args.thread_num < 1:
-        msg = '[*] Invalid input in [-t](range: 1 to 200), has changed to default(30)'
-        outputscreen.warning(msg)
+    if not isinstance(args.thread_num, int) or args.thread_num < 1 or args.thread_num > 200:
+        outputscreen.warning("[*] Invalid input in [-t] (range: 1..200). Using default: 30")
         conf.thread_num = 30
-        return
-    conf.thread_num = args.thread_num
+    else:
+        conf.thread_num = args.thread_num
+
 
 def BruterRegister(args):
-    """
-    配置bruter模块
-    """
+    # gán debug flag (bool)
+    conf.debug = bool(getattr(args, "debug", False))
 
-    if args.load_config_file:
-        #加载配置文件
+    if getattr(args, "load_config_file", False):
         loadConf()
     else:
-        outputscreen.error("[+] Function development, coming soon!please use -lcf parameter")
-        if args.debug:
-            conf.debug = args.debug
-        else:
-            conf.debug = args.debug
-        sys.exit()
+        outputscreen.error("[+] Feature not ready. Please use -lcf/--load-config-file to specify a config file.")
+        sys.exit(1)
+
 
 def TargetRegister(args):
-    """
-    加载目标模块
-    """
-    msg = '[*] Initialize targets...'
-    outputscreen.warning(msg)
+    outputscreen.warning("[*] Initialize targets...")
 
-    #初始化目标队列
-    conf.target = queue.Queue()
+    # Initialize target queue
+    conf.target = Queue()
 
-    # 用户输入入队
-    if args.target_input:
-        # 尝试解析目标地址
+    target_input = getattr(args, "target_input", None)
+    if target_input:
         try:
-            lists=parseTarget(args.target_input)
-        except:
-            helpmsg = "Invalid input in [-i], Example: -i [http://]target.com or 192.168.1.1[/24] or 192.168.1.1-192.168.1.100"
-            outputscreen.error(helpmsg)
-            sys.exit()
-        # 判断处理量
-        if (len(lists))>100000:
-            warnmsg = "[*] Loading %d targets, Maybe it's too much, continue? [y/N]" % (len(lists))
-            outputscreen.warning(warnmsg)
-            flag =input()
-            if flag in ('Y', 'y', 'yes', 'YES','Yes'):
-                pass
-            else:
-                msg = '[-] User quit!'
-                outputscreen.warning(msg)
-                sys.exit()
-        msg = '[+] Load targets from: %s' % args.target_input
-        outputscreen.success(msg)
-        # save to conf
-        for target in lists:
-            conf.target.put(target)
+            targets = parseTarget(target_input)
+        except Exception as e:
+            outputscreen.error(
+                "Invalid input in [-i]. Example:\n"
+                "  -i [http://]target.com\n"
+                "  -i 192.168.1.1[/24]\n"
+                "  -i 192.168.1.1-192.168.1.100"
+            )
+            if conf.debug:
+                outputscreen.error(f"[debug] parseTarget error: {e!r}")
+            sys.exit(1)
+
+        if len(targets) > 100_000:
+            outputscreen.warning(f"[*] Loading {len(targets)} targets. Maybe it's too much, continue? [y/N]")
+            try:
+                ans = input().strip()
+            except EOFError:
+                ans = ""
+            if ans not in ("Y", "y", "yes", "YES", "Yes"):
+                outputscreen.warning("[-] User quit!")
+                sys.exit(1)
+
+        outputscreen.success(f"[+] Load targets from: {target_input}")
+        for t in targets:
+            conf.target.put(t)
         conf.target_nums = conf.target.qsize()
 
-    # 文件读入入队
-    elif args.target_file:
-        if not os.path.isfile(args.target_file):
-            msg = '[-] TargetFile not found: %s' % args.target_file
-            outputscreen.error(msg)
-            sys.exit()
-        msg = '[+] Load targets from: %s' % args.target_file
-        outputscreen.success(msg)
-        with open(args.target_file, 'r', encoding='utf-8') as f:
-            targets = f.readlines()
-            for target in targets:
-                target=target.strip('\n')
-                parsed_target=parseTarget(target)
-                for i in parsed_target:
-                    conf.target.put(i)
+    elif getattr(args, "target_file", None):
+        target_file = args.target_file
+        if not os.path.isfile(target_file):
+            outputscreen.error(f"[-] Target file not found: {target_file}")
+            sys.exit(1)
+
+        outputscreen.success(f"[+] Load targets from: {target_file}")
+        try:
+            with open(target_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        parsed = parseTarget(line)
+                    except Exception as e:
+                        if conf.debug:
+                            outputscreen.error(f"[debug] parseTarget failed for line '{line}': {e!r}")
+                        continue
+                    for item in parsed:
+                        conf.target.put(item)
+        except Exception as e:
+            outputscreen.error(f"[-] Failed to read target file: {e}")
+            sys.exit(1)
+
         conf.target_nums = conf.target.qsize()
 
-    #验证目标数量
     if conf.target.qsize() == 0:
-        errormsg = msg = '[!] No targets found.Please load targets with [-i|-iF]'
-        outputscreen.error(errormsg)
-        sys.exit()
+        outputscreen.error("[!] No targets found. Please load targets with [-i | -iF]")
+        sys.exit(1)
