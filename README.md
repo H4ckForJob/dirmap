@@ -235,9 +235,9 @@ conf.custom_503_page = ""
 #自定义正则表达式，匹配页面内容
 #conf.custom_response_page = "([0-9]){3}([a-z]){3}test"
 conf.custom_response_page = ""
-#跳过显示页面大小为x的页面，若不设置，请配置成"None"，默认配置“None”。其他大小配置参考e.g:None;0b;1k;1m
-#conf.skip_size = "0b"
-conf.skip_size = "None"
+#跳过显示页面大小为x的页面，若不设置，请配置成"[]"，默认配置“[]”。其他大小配置参考e.g:[]或者["1b","1k","1m"]
+#conf.skip_size_list = ["1b","1k","1m"]
+conf.skip_size_list = []
 #正则过滤列表。如果页面内容匹配正则表达式，则跳过该页面。默认配置空。其他配置参考e.g:["test1","test2"]
 conf.filter_regexp_list = []
 
