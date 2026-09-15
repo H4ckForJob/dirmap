@@ -126,7 +126,7 @@ def loadConf():
     conf.auto_check_404_page = eval(ConfigFileParser().auto_check_404_page())
     conf.custom_503_page = eval(ConfigFileParser().custom_503_page())
     conf.custom_response_page = eval(ConfigFileParser().custom_response_page())
-    conf.skip_size = eval(ConfigFileParser().skip_size())
+    conf.skip_size_list = eval(ConfigFileParser().skip_size_list())
     conf.filter_regexp_list = eval(ConfigFileParser().filter_regexp_list())
 
     conf.proxy_server = eval(ConfigFileParser().proxy_server())
@@ -445,7 +445,7 @@ def responseHandler(response):
     except (KeyError, ValueError):
         size = intToSize(len(response.content))
     #跳过大小为skip_size的页面
-    if size == conf.skip_size:
+    if size in conf.skip_size_list:
         return
     #根据正则过滤响应。将匹配上正则的响应全部丢弃
     if conf.filter_regexp_list:

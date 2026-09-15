@@ -112,8 +112,8 @@ class ConfigFileParser:
         return self._get_option('ResponseHandler','conf.custom_503_page')
     def custom_response_page(self):
         return self._get_option('ResponseHandler','conf.custom_response_page')
-    def skip_size(self):
-        return self._get_option('ResponseHandler','conf.skip_size')
+    def skip_size_list(self):
+        return self._get_option('ResponseHandler','conf.skip_size_list')
     def filter_regexp_list(self):
         return self._get_option('ResponseHandler','conf.filter_regexp_list')
 
